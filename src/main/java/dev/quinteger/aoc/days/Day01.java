@@ -12,7 +12,7 @@ public class Day01 extends Solution {
     }
 
     @Override
-    public void solvePart1() {
+    public Object solvePart1() {
         int maxSum = 0;
         int currentSum = 0;
         for (int i = 0; i < input.size(); i++) {
@@ -29,11 +29,11 @@ public class Day01 extends Solution {
                 currentSum = 0;
             }
         }
-        System.out.println(maxSum);
+        return maxSum;
     }
 
     @Override
-    public void solvePart2() {
+    public Object solvePart2() {
         List<Integer> list = new ArrayList<>();
         int currentSum = 0;
         for (int i = 0; i < input.size(); i++) {
@@ -48,11 +48,10 @@ public class Day01 extends Solution {
                 currentSum = 0;
             }
         }
-        var result = list.stream()
+        return list.stream()
                 .sorted(Comparator.reverseOrder())
                 .limit(3)
                 .mapToInt(Integer::intValue)
                 .sum();
-        System.out.println(result);
     }
 }
