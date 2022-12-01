@@ -42,7 +42,9 @@ public class Day01 extends Solution {
                 current += cals;
             }
         }
-        var result = list.stream().sorted(Comparator.reverseOrder()).limit(3).toList();
+        var result = list.stream()
+                .sorted(Comparator.reverseOrder())
+                .limit(3).mapToInt(i -> i).sum();
         System.out.println(result);
     }
 }
