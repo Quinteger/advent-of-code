@@ -44,7 +44,7 @@ public class Day01 extends Solution {
         }
         var result = list.stream()
                 .sorted(Comparator.reverseOrder())
-                .limit(3).mapToInt(i -> i).sum();
+                .limit(3).mapToInt(Integer::intValue).sum();
         System.out.println(result);
     }
 }
