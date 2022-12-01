@@ -1,6 +1,7 @@
 package dev.quinteger.aoc;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -42,13 +43,13 @@ public class AOCLauncher {
             try (var fileSystem = createFileSystem(uri)) {
                 lines = Files.readAllLines(fileSystem.getPath(fileName));
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedIOException(e);
             }
         } else {
             try {
                 lines = Files.readAllLines(Path.of(uri));
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedIOException(e);
             }
         }
 
