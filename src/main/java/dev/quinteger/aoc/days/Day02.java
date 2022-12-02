@@ -20,12 +20,12 @@ public class Day02 extends Solution {
         return solveWithMoveSelector(Move::pickMoveForOutcome);
     }
 
-    public Object solveWithMoveSelector(BiFunction<? super Move, ? super String, ? extends Move> responseMoveSelector) {
+    public Object solveWithMoveSelector(BiFunction<? super Move, ? super Character, ? extends Move> responseMoveSelector) {
         return input.stream()
-                .map(l -> l.split(" "))
-                .map(stringPair -> {
-                    var opponentMove = Move.getOpponentMove(stringPair[0]);
-                    var responseMove = responseMoveSelector.apply(opponentMove, stringPair[1]);
+                .map(String::toCharArray)
+                .map(chars -> {
+                    var opponentMove = Move.getOpponentMove(chars[0]);
+                    var responseMove = responseMoveSelector.apply(opponentMove, chars[2]);
                     return responseMove.score + opponentMove.defendWith(responseMove);
                 }).mapToInt(Integer::intValue)
                 .sum();
@@ -50,29 +50,29 @@ public class Day02 extends Solution {
             };
         }
 
-        public Move pickMoveForOutcome(String move) {
+        public Move pickMoveForOutcome(char move) {
             return switch (move) {
-                case "X" -> this == ROCK ? SCISSORS : this == SCISSORS ? PAPER : ROCK;
-                case "Y" -> this == ROCK ? ROCK : this == SCISSORS ? SCISSORS : PAPER;
-                case "Z" -> this == ROCK ? PAPER : this == SCISSORS ? ROCK : SCISSORS;
+                case 'X' -> this == ROCK ? SCISSORS : this == SCISSORS ? PAPER : ROCK;
+                case 'Y' -> this == ROCK ? ROCK : this == SCISSORS ? SCISSORS : PAPER;
+                case 'Z' -> this == ROCK ? PAPER : this == SCISSORS ? ROCK : SCISSORS;
                 default -> throw new IllegalArgumentException();
             };
         }
 
-        public static Move getOpponentMove(String move) {
+        public static Move getOpponentMove(char move) {
             return switch (move) {
-                case "A" -> ROCK;
-                case "B" -> PAPER;
-                case "C" -> SCISSORS;
+                case 'A' -> ROCK;
+                case 'B' -> PAPER;
+                case 'C' -> SCISSORS;
                 default -> throw new IllegalArgumentException();
             };
         }
 
-        public static Move getResponseMove(String move) {
+        public static Move getResponseMove(char move) {
             return switch (move) {
-                case "X" -> ROCK;
-                case "Y" -> PAPER;
-                case "Z" -> SCISSORS;
+                case 'X' -> ROCK;
+                case 'Y' -> PAPER;
+                case 'Z' -> SCISSORS;
                 default -> throw new IllegalArgumentException();
             };
         }
