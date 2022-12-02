@@ -26,20 +26,18 @@ public class Day02 extends Solution {
                 .map(chars -> {
                     var opponentMove = Move.getOpponentMove(chars[0]);
                     var responseMove = responseMoveSelector.apply(opponentMove, chars[2]);
-                    return responseMove.score + opponentMove.defendWith(responseMove);
+                    return responseMove.getScore() + opponentMove.defendWith(responseMove);
                 }).mapToInt(Integer::intValue)
                 .sum();
     }
 
     private enum Move {
-        ROCK(1),
-        PAPER(2),
-        SCISSORS(3);
+        ROCK,
+        PAPER,
+        SCISSORS;
 
-        private final int score;
-
-        Move(int score){
-            this.score = score;
+        public int getScore() {
+            return ordinal() + 1;
         }
 
         public int defendWith(Move response) {
