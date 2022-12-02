@@ -53,7 +53,7 @@ public class Day02 extends Solution {
         public Move pickMoveForOutcome(char move) {
             return switch (move) {
                 case 'X' -> this == ROCK ? SCISSORS : this == SCISSORS ? PAPER : ROCK;
-                case 'Y' -> this == ROCK ? ROCK : this == SCISSORS ? SCISSORS : PAPER;
+                case 'Y' -> this;
                 case 'Z' -> this == ROCK ? PAPER : this == SCISSORS ? ROCK : SCISSORS;
                 default -> throw new IllegalArgumentException();
             };
