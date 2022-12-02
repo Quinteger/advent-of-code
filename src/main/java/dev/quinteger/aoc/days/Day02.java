@@ -12,7 +12,7 @@ public class Day02 extends Solution {
 
     @Override
     public Object solvePart1() {
-        return solveWithMoveSelector((move, s) -> Move.getResponseMove(s));
+        return solveWithMoveSelector((move, c) -> Move.getResponseMove(c));
     }
 
     @Override
