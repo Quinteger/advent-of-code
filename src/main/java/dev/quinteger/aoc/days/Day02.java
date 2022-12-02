@@ -3,6 +3,7 @@ package dev.quinteger.aoc.days;
 import dev.quinteger.aoc.Solution;
 
 import java.util.List;
+import java.util.function.BiFunction;
 
 public class Day02 extends Solution {
     public Day02(List<String> input) {
@@ -11,23 +12,20 @@ public class Day02 extends Solution {
 
     @Override
     public Object solvePart1() {
-        return input.stream()
-                .map(l -> l.split(" "))
-                .map(stringPair -> {
-                    var opponentMove = Move.getOpponentMove(stringPair[0]);
-                    var responseMove = Move.getResponseMove(stringPair[1]);
-                    return responseMove.score + opponentMove.defendWith(responseMove);
-                }).mapToInt(Integer::intValue)
-                .sum();
+        return solveWithMoveSelector((move, s) -> Move.getResponseMove(s));
     }
 
     @Override
     public Object solvePart2() {
+        return solveWithMoveSelector(Move::pickMoveForOutcome);
+    }
+
+    public Object solveWithMoveSelector(BiFunction<? super Move, ? super String, ? extends Move> responseMoveSelector) {
         return input.stream()
                 .map(l -> l.split(" "))
                 .map(stringPair -> {
                     var opponentMove = Move.getOpponentMove(stringPair[0]);
-                    var responseMove = opponentMove.pickShapeForOutcome(stringPair[1]);
+                    var responseMove = responseMoveSelector.apply(opponentMove, stringPair[1]);
                     return responseMove.score + opponentMove.defendWith(responseMove);
                 }).mapToInt(Integer::intValue)
                 .sum();
@@ -35,8 +33,8 @@ public class Day02 extends Solution {
 
     private enum Move {
         ROCK(1),
-        PAPER( 2),
-        SCISSORS( 3);
+        PAPER(2),
+        SCISSORS(3);
 
         private final int score;
 
@@ -52,7 +50,7 @@ public class Day02 extends Solution {
             };
         }
 
-        public Move pickShapeForOutcome(String move) {
+        public Move pickMoveForOutcome(String move) {
             return switch (move) {
                 case "X" -> this == ROCK ? SCISSORS : this == SCISSORS ? PAPER : ROCK;
                 case "Y" -> this == ROCK ? ROCK : this == SCISSORS ? SCISSORS : PAPER;
