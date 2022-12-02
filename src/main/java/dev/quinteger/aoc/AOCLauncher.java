@@ -12,7 +12,7 @@ import java.util.List;
 
 public class AOCLauncher {
     private static final int MIN = 1;
-    private static final int MAX = 1;
+    private static final int MAX = 25;
 
     public static void main(String[] args) {
         var arg = getArg(args);
