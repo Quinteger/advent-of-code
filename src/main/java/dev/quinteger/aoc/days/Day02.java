@@ -50,8 +50,8 @@ public class Day02 extends Solution {
             };
         }
 
-        public Move pickMoveForOutcome(char move) {
-            return switch (move) {
+        public Move pickMoveForOutcome(char outcome) {
+            return switch (outcome) {
                 case 'X' -> this == ROCK ? SCISSORS : this == SCISSORS ? PAPER : ROCK;
                 case 'Y' -> this;
                 case 'Z' -> this == ROCK ? PAPER : this == SCISSORS ? ROCK : SCISSORS;
