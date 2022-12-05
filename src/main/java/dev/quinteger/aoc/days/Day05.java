@@ -16,7 +16,7 @@ public class Day05 extends Solution {
     private static final int STACK_COUNT = 9;
     private static final int MOVE_START_LINE = 11;
 
-    private static final Pattern MOVE_PATTERN = Pattern.compile("^move (\\d+) from (\\d) to (\\d)$");
+    private static final Pattern MOVE_PATTERN = Pattern.compile("^move (\\d+) from (\\d+) to (\\d+)$");
 
     private interface StackMover {
         void move(Deque<Character> from, Deque<Character> to, int amount);
