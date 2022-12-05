@@ -29,7 +29,7 @@ public class Day05 extends Solution {
                 if (!stackFrom.isEmpty()) {
                     stackTo.addFirst(stackFrom.pollFirst());
                 } else {
-                    throw movingFromEmptyStack();
+                    throw emptyStack();
                 }
             }
         });
@@ -43,7 +43,7 @@ public class Day05 extends Solution {
                 if (!stackFrom.isEmpty()) {
                     movedStack.addLast(stackFrom.pollFirst());
                 } else {
-                    throw movingFromEmptyStack();
+                    throw emptyStack();
                 }
             }
             int size = movedStack.size();
@@ -83,13 +83,13 @@ public class Day05 extends Solution {
             if (!stack.isEmpty()) {
                 sb.append(stack.getFirst());
             } else {
-                throw new RuntimeException("A stack is empty");
+                throw emptyStack();
             }
         }
         return sb.toString();
     }
 
-    private static RuntimeException movingFromEmptyStack() {
-        return new RuntimeException("Moving from an empty stack");
+    private static RuntimeException emptyStack() {
+        return new RuntimeException("A stack is empty");
     }
 }
