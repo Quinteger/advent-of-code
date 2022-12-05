@@ -40,7 +40,7 @@ public class Day05 extends Solution {
             }
             int size = movedStack.size();
             for (int i = 0; i < size; i++) {
-                stackTo.addFirst(movedStack.pollLast());
+                stackTo.addFirst(movedStack.removeLast());
             }
         });
     }
