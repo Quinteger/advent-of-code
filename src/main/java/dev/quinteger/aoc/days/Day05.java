@@ -53,7 +53,7 @@ public class Day05 extends Solution {
         });
     }
 
-    private <T> Object solveWithStackMover(StackMover stackMover) {
+    private Object solveWithStackMover(StackMover stackMover) {
         List<Deque<Character>> stacks = new ArrayList<>(STACK_COUNT);
         for (int i = 0; i < STACK_COUNT; i++) {
             stacks.add(new ArrayDeque<>());
