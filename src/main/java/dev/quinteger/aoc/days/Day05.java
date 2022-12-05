@@ -13,12 +13,49 @@ public class Day05 extends Solution {
         super(input);
     }
 
+    private static final int STACK_COUNT = 9;
+    private static final int MOVE_START_LINE = 11;
+
     private static final Pattern MOVE_PATTERN = Pattern.compile("^move (\\d+) from (\\d) to (\\d)$");
+
+    private interface StackMover {
+        void move(Deque<Character> from, Deque<Character> to, int amount);
+    }
 
     @Override
     public Object solvePart1() {
-        List<Deque<Character>> stacks = new ArrayList<>(9);
-        for (int i = 0; i < 9; i++) {
+        return solveWithStackMover((stackFrom, stackTo, amount) -> {
+            for (int i = 0; i < amount; i++) {
+                if (!stackFrom.isEmpty()) {
+                    stackTo.addFirst(stackFrom.pollFirst());
+                } else {
+                    throw movingFromEmptyStack();
+                }
+            }
+        });
+    }
+
+    @Override
+    public Object solvePart2() {
+        return solveWithStackMover((stackFrom, stackTo, amount) -> {
+            var movedStack = new ArrayDeque<Character>();
+            for (int i = 0; i < amount; i++) {
+                if (!stackFrom.isEmpty()) {
+                    movedStack.addLast(stackFrom.pollFirst());
+                } else {
+                    throw movingFromEmptyStack();
+                }
+            }
+            int size = movedStack.size();
+            for (int i = 0; i < size; i++) {
+                stackTo.addFirst(movedStack.pollLast());
+            }
+        });
+    }
+
+    private <T> Object solveWithStackMover(StackMover stackMover) {
+        List<Deque<Character>> stacks = new ArrayList<>(STACK_COUNT);
+        for (int i = 0; i < STACK_COUNT; i++) {
             stacks.add(new ArrayDeque<>());
         }
         for (String line : input.subList(0, 8)) {
@@ -32,71 +69,27 @@ public class Day05 extends Solution {
                 j++;
             }
         }
-        for (String line : input.subList(10, input.size())) {
+        for (String line : input.subList(MOVE_START_LINE - 1, input.size())) {
             var matcher = MOVE_PATTERN.matcher(line);
             if (matcher.matches() && matcher.groupCount() == 3) {
-                Deque<Character> stackFrom = stacks.get(Integer.parseInt(matcher.group(2)) - 1);
-                Deque<Character> stackTo = stacks.get(Integer.parseInt(matcher.group(3)) - 1);
-                for (int i = 0; i < Integer.parseInt(matcher.group(1)); i++) {
-                    if (!stackFrom.isEmpty()) {
-                        stackTo.addFirst(stackFrom.pollFirst());
-                    } else {
-                        break;
-                    }
-                }
+                stackMover.move(
+                        stacks.get(Integer.parseInt(matcher.group(2)) - 1),
+                        stacks.get(Integer.parseInt(matcher.group(3)) - 1),
+                        Integer.parseInt(matcher.group(1)));
             }
         }
         var sb = new StringBuilder();
-        for (Deque<Character> stack : stacks) {
+        for (var stack : stacks) {
             if (!stack.isEmpty()) {
                 sb.append(stack.getFirst());
+            } else {
+                throw new RuntimeException("A stack is empty");
             }
         }
         return sb.toString();
     }
 
-    @Override
-    public Object solvePart2() {
-        List<Deque<Character>> stacks = new ArrayList<>(9);
-        for (int i = 0; i < 9; i++) {
-            stacks.add(new ArrayDeque<>());
-        }
-        for (String line : input.subList(0, 8)) {
-            var chars = line.toCharArray();
-            int j = 0;
-            for (int i = 0; i < chars.length; i+=4) {
-                char c = chars[i];
-                if (c != ' ') {
-                    stacks.get(j).addLast(chars[i + 1]);
-                }
-                j++;
-            }
-        }
-        for (String line : input.subList(10, input.size())) {
-            var matcher = MOVE_PATTERN.matcher(line);
-            if (matcher.matches() && matcher.groupCount() == 3) {
-                Deque<Character> stackFrom = stacks.get(Integer.parseInt(matcher.group(2)) - 1);
-                Deque<Character> stackTo = stacks.get(Integer.parseInt(matcher.group(3)) - 1);
-                Deque<Character> movedStack = new ArrayDeque<>();
-                for (int i = 0; i < Integer.parseInt(matcher.group(1)); i++) {
-                    if (!stackFrom.isEmpty()) {
-                        movedStack.addLast(stackFrom.pollFirst());
-                    } else {
-                        break;
-                    }
-                }
-                int size = movedStack.size();
-                for (int i = 0; i < size; i++) {
-                    stackTo.addFirst(movedStack.pollLast());
-                }
-            }
-        }
-        var sb = new StringBuilder();
-        for (Deque<Character> stack : stacks) {
-            if (!stack.isEmpty()) {
-                sb.append(stack.getFirst());
-            }
-        }
-        return sb.toString();
+    private static RuntimeException movingFromEmptyStack() {
+        return new RuntimeException("Moving from an empty stack");
     }
 }
