@@ -26,11 +26,7 @@ public class Day05 extends Solution {
     public Object solvePart1() {
         return solveWithStackMover((stackFrom, stackTo, amount) -> {
             for (int i = 0; i < amount; i++) {
-                if (!stackFrom.isEmpty()) {
-                    stackTo.addFirst(stackFrom.pollFirst());
-                } else {
-                    throw emptyStack();
-                }
+                stackTo.addFirst(stackFrom.removeFirst());
             }
         });
     }
@@ -40,11 +36,7 @@ public class Day05 extends Solution {
         return solveWithStackMover((stackFrom, stackTo, amount) -> {
             var movedStack = new ArrayDeque<Character>();
             for (int i = 0; i < amount; i++) {
-                if (!stackFrom.isEmpty()) {
-                    movedStack.addLast(stackFrom.pollFirst());
-                } else {
-                    throw emptyStack();
-                }
+                movedStack.addLast(stackFrom.removeFirst());
             }
             int size = movedStack.size();
             for (int i = 0; i < size; i++) {
@@ -80,16 +72,8 @@ public class Day05 extends Solution {
         }
         var sb = new StringBuilder();
         for (var stack : stacks) {
-            if (!stack.isEmpty()) {
-                sb.append(stack.getFirst());
-            } else {
-                throw emptyStack();
-            }
+            sb.append(stack.getFirst());
         }
         return sb.toString();
-    }
-
-    private static RuntimeException emptyStack() {
-        return new RuntimeException("A stack is empty");
     }
 }
