@@ -58,7 +58,7 @@ public class Day05 extends Solution {
         for (int i = 0; i < STACK_COUNT; i++) {
             stacks.add(new ArrayDeque<>());
         }
-        for (String line : input.subList(0, 8)) {
+        for (String line : input.subList(0, MOVE_START_LINE - 3)) {
             var chars = line.toCharArray();
             int j = 0;
             for (int i = 0; i < chars.length; i+=4) {
