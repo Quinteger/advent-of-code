@@ -29,7 +29,7 @@ public class Day07 extends Solution {
                         currentDir = currentDir.substring(0, lastIndex);
                     }
                 } else {
-                    if (currentDir.endsWith("/")) {
+                    if (currentDir.charAt(currentDir.length() - 1) == '/') {
                         currentDir = currentDir + split[2];
                     } else {
                         currentDir = currentDir + "/" + split[2];
@@ -39,8 +39,7 @@ public class Day07 extends Solution {
             } else if (split[0].matches("\\d+")) {
                 for (Map.Entry<String, Integer> e : dirs.entrySet()) {
                     if (currentDir.startsWith(e.getKey())) {
-                        var value = e.getValue();
-                        e.setValue(value + Integer.parseInt(split[0]));
+                        e.setValue(e.getValue() + Integer.parseInt(split[0]));
                     }
                 }
             }
