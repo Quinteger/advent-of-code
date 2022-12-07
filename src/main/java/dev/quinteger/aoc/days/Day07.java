@@ -13,6 +13,8 @@ public class Day07 extends Solution {
 
     private final Map<String, Integer> dirs = new HashMap<>();
 
+    private static final int SIZE_THRESHOLD = 100_000;
+
     @Override
     public Object solvePart1() {
         var currentDir = "/";
@@ -44,7 +46,7 @@ public class Day07 extends Solution {
                 }
             }
         }
-        return dirs.values().stream().filter(integer -> integer <= 100000).mapToInt(Integer::intValue).sum();
+        return dirs.values().stream().filter(integer -> integer <= SIZE_THRESHOLD).mapToInt(Integer::intValue).sum();
     }
 
     private static final int TOTAL_SIZE = 70_000_000;
