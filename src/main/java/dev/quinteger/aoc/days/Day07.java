@@ -1,0 +1,63 @@
+package dev.quinteger.aoc.days;
+
+import dev.quinteger.aoc.Solution;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class Day07 extends Solution {
+    public Day07(List<String> input) {
+        super(input);
+    }
+
+    @Override
+    public Object solvePart1() {
+        Map<String, Integer> dirs = new HashMap<>();
+        var currentDir = "/";
+        for (String line : input) {
+            var split = line.split(" ");
+            if (split[1].equals("cd")) {
+                if (split[2].startsWith("/")) {
+                    currentDir = split[2];
+                } else if (split[2].equals("..")) {
+                    var lastIndex = currentDir.lastIndexOf('/');
+                    if (lastIndex == 0) {
+                        currentDir = "/";
+                    } else {
+                        currentDir = currentDir.substring(0, lastIndex);
+                    }
+                } else {
+                    if (currentDir.endsWith("/")) {
+                        currentDir = currentDir + split[2];
+                    } else {
+                        currentDir = currentDir + "/" + split[2];
+                    }
+                }
+                dirs.putIfAbsent(currentDir, 0);
+            } else if (split[0].matches("\\d+")) {
+                for (Map.Entry<String, Integer> e : dirs.entrySet()) {
+                    if (currentDir.startsWith(e.getKey())) {
+                        var value = e.getValue();
+                        e.setValue(value + Integer.parseInt(split[0]));
+                    }
+                }
+            }
+        }
+        this.dirs = dirs;
+        return dirs.values().stream().filter(integer -> integer <= 100000).mapToInt(i -> i).sum();
+    }
+
+    private Map<String, Integer> dirs;
+
+    @Override
+    public Object solvePart2() {
+        int unused = 70000000 - dirs.get("/");
+        int needToDelete = 30000000 - unused;
+        return dirs.entrySet().stream()
+                .filter(e -> e.getValue() >= needToDelete)
+                .min(Map.Entry.comparingByValue())
+                .map(Map.Entry::getValue)
+                .orElseThrow(RuntimeException::new);
+    }
+}
