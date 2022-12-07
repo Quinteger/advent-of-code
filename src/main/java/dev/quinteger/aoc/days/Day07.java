@@ -21,7 +21,7 @@ public class Day07 extends Solution {
         for (String line : input) {
             var split = line.split(" ");
             if (split[1].equals("cd")) {
-                if (split[2].startsWith("/")) {
+                if (split[2].charAt(0) == '/') {
                     currentDir = split[2];
                 } else if (split[2].equals("..")) {
                     var lastIndex = currentDir.lastIndexOf('/');
