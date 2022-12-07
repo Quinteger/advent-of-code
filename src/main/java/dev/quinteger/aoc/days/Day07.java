@@ -46,7 +46,7 @@ public class Day07 extends Solution {
                 }
             }
         }
-        return dirs.values().stream().filter(integer -> integer <= SIZE_THRESHOLD).mapToInt(Integer::intValue).sum();
+        return dirs.values().stream().filter(i -> i <= SIZE_THRESHOLD).mapToInt(Integer::intValue).sum();
     }
 
     private static final int TOTAL_SIZE = 70_000_000;
