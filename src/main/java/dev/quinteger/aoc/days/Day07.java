@@ -11,9 +11,10 @@ public class Day07 extends Solution {
         super(input);
     }
 
+    private final Map<String, Integer> dirs = new HashMap<>();
+
     @Override
     public Object solvePart1() {
-        Map<String, Integer> dirs = new HashMap<>();
         var currentDir = "/";
         for (String line : input) {
             var split = line.split(" ");
@@ -44,16 +45,16 @@ public class Day07 extends Solution {
                 }
             }
         }
-        this.dirs = dirs;
-        return dirs.values().stream().filter(integer -> integer <= 100000).mapToInt(i -> i).sum();
+        return dirs.values().stream().filter(integer -> integer <= 100000).mapToInt(Integer::intValue).sum();
     }
 
-    private Map<String, Integer> dirs;
+    private static final int TOTAL_SIZE = 70_000_000;
+    private static final int REQUIRED = 30_000_000;
 
     @Override
     public Object solvePart2() {
-        int unused = 70000000 - dirs.get("/");
-        int needToDelete = 30000000 - unused;
+        int unused = TOTAL_SIZE - dirs.get("/");
+        int needToDelete = REQUIRED - unused;
         return dirs.entrySet().stream()
                 .filter(e -> e.getValue() >= needToDelete)
                 .min(Map.Entry.comparingByValue())
