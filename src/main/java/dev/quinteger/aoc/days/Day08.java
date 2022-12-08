@@ -17,107 +17,77 @@ public class Day08 extends Solution {
     }
 
     private final int[][] trees;
+    private int count = 0;
+    private int score = 0;
 
     @Override
     public Object solvePart1() {
-        int count = 0;
-        for (int i = 0; i < trees.length; i++) {
-            for (int j = 0; j < trees[i].length; j++) {
-                if (isVisible(trees, i, j)) {
+        for (int row = 0; row < trees.length; row++) {
+            for (int column = 0; column < trees[row].length; column++) {
+                var treeInfo = getTreeInfo(trees, row, column);
+                if (treeInfo.visible()){
                     count++;
+                }
+                int newScore = treeInfo.score();
+                if (newScore > score) {
+                    score = newScore;
                 }
             }
         }
         return count;
     }
 
-    private static boolean isVisible(int[][] trees, int row, int column) {
+    private record TreeInfo(boolean visible, int score) {}
+
+    private static TreeInfo getTreeInfo(int[][] trees, int row, int column) {
         int tree = trees[row][column];
 
         boolean topVisible = true;
-        for (int k = 0; k < row; k++) {
-            if (trees[k][column] >= tree) {
+        int topScore = 0;
+        for (int newRow = row - 1; newRow >= 0; newRow--) {
+            topScore++;
+            if (trees[newRow][column] >= tree) {
                 topVisible = false;
                 break;
             }
         }
 
         boolean bottomVisible = true;
-        for (int k = row + 1; k < trees.length; k++) {
-            if (trees[k][column] >= tree) {
+        int bottomScore = 0;
+        for (int newRow = row + 1; newRow < trees.length; newRow++) {
+            bottomScore++;
+            if (trees[newRow][column] >= tree) {
                 bottomVisible = false;
                 break;
             }
         }
 
         boolean leftVisible = true;
-        for (int k = 0; k < column; k++) {
-            if (trees[row][k] >= tree) {
+        int leftScore = 0;
+        for (int newColumn = column - 1; newColumn >= 0; newColumn--) {
+            leftScore++;
+            if (trees[row][newColumn] >= tree) {
                 leftVisible = false;
                 break;
             }
         }
 
         boolean rightVisible = true;
-        for (int k = column + 1; k < trees[row].length; k++) {
-            if (trees[row][k] >= tree) {
+        int rightScore = 0;
+        for (int newColumn = column + 1; newColumn < trees[row].length; newColumn++) {
+            rightScore++;
+            if (trees[row][newColumn] >= tree) {
                 rightVisible = false;
                 break;
             }
         }
 
-        return topVisible || bottomVisible || leftVisible || rightVisible;
+        return new TreeInfo(topVisible || bottomVisible || leftVisible || rightVisible,
+                topScore * bottomScore * leftScore * rightScore);
     }
 
     @Override
     public Object solvePart2() {
-        int score = 0;
-        for (int i = 0; i < trees.length; i++) {
-            for (int j = 0; j < trees[i].length; j++) {
-                int newScore = getScore(trees, i, j);
-                if (newScore > score) {
-                    score = newScore;
-                }
-            }
-        }
         return score;
-    }
-
-    private static int getScore(int[][] trees, int row, int column) {
-        int tree = trees[row][column];
-
-        int topScore = 0;
-        for (int k = row - 1; k >=0; k--) {
-            topScore++;
-            if (trees[k][column] >= tree) {
-                break;
-            }
-        }
-
-        int bottomScore = 0;
-        for (int k = row + 1; k < trees.length; k++) {
-            bottomScore++;
-            if (trees[k][column] >= tree) {
-                break;
-            }
-        }
-
-        int leftScore = 0;
-        for (int k = column - 1; k >=0; k--) {
-            leftScore++;
-            if (trees[row][k] >= tree) {
-                break;
-            }
-        }
-
-        int rightScore = 0;
-        for (int k = column + 1; k < trees[row].length; k++) {
-            rightScore++;
-            if (trees[row][k] >= tree) {
-                break;
-            }
-        }
-
-        return topScore * bottomScore * leftScore * rightScore;
     }
 }
