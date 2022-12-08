@@ -9,28 +9,26 @@ import java.util.TreeSet;
 public class Day08 extends Solution {
     public Day08(List<String> input) {
         super(input);
-    }
-
-    @Override
-    public Object solvePart1() {
-        int[][] trees = new int[input.size()][input.get(0).length()];
+        trees = new int[input.size()][input.get(0).length()];
         for (int i = 0; i < input.size(); i++) {
             String line = input.get(i);
             for (int j = 0; j < line.length(); j++) {
                 trees[i][j] = line.charAt(j) - '0';
             }
         }
+    }
+
+    private final int[][] trees;
+
+    @Override
+    public Object solvePart1() {
         int count = 0;
         for (int i = 0; i < trees.length; i++) {
             for (int j = 0; j < trees[i].length; j++) {
                 if (isVisible(trees, i, j)) {
                     count++;
-//                    System.out.print("1 ");
-                } else {
-//                    System.out.print("0 ");
                 }
             }
-//            System.out.println();
         }
         return count;
     }
@@ -73,6 +71,17 @@ public class Day08 extends Solution {
         return topVisible || bottomVisible || leftVisible || rightVisible;
     }
 
+    @Override
+    public Object solvePart2() {
+        SortedSet<Integer> scores = new TreeSet<>();
+        for (int i = 0; i < trees.length; i++) {
+            for (int j = 0; j < trees[i].length; j++) {
+                scores.add(getScore(trees, i, j));
+            }
+        }
+        return scores.last();
+    }
+
     private static int getScore(int[][] trees, int i, int j) {
         int tree = trees[i][j];
 
@@ -109,23 +118,5 @@ public class Day08 extends Solution {
         }
 
         return topScore * bottomScore * leftScore * rightScore;
-    }
-
-    @Override
-    public Object solvePart2() {
-        int[][] trees = new int[input.size()][input.get(0).length()];
-        for (int i = 0; i < input.size(); i++) {
-            String line = input.get(i);
-            for (int j = 0; j < line.length(); j++) {
-                trees[i][j] = line.charAt(j) - '0';
-            }
-        }
-        SortedSet<Integer> scores = new TreeSet<>();
-        for (int i = 0; i < trees.length; i++) {
-            for (int j = 0; j < trees[i].length; j++) {
-                scores.add(getScore(trees, i, j));
-            }
-        }
-        return scores.last();
     }
 }
