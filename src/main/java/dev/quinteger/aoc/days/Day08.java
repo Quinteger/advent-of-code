@@ -3,8 +3,6 @@ package dev.quinteger.aoc.days;
 import dev.quinteger.aoc.Solution;
 
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 public class Day08 extends Solution {
     public Day08(List<String> input) {
@@ -73,13 +71,16 @@ public class Day08 extends Solution {
 
     @Override
     public Object solvePart2() {
-        SortedSet<Integer> scores = new TreeSet<>();
+        int score = 0;
         for (int i = 0; i < trees.length; i++) {
             for (int j = 0; j < trees[i].length; j++) {
-                scores.add(getScore(trees, i, j));
+                int newScore = getScore(trees, i, j);
+                if (newScore > score) {
+                    score = newScore;
+                }
             }
         }
-        return scores.last();
+        return score;
     }
 
     private static int getScore(int[][] trees, int row, int column) {
