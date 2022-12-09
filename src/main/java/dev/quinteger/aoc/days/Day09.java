@@ -27,7 +27,7 @@ public class Day09 extends Solution {
         public Vector2i moveTo(Vector2i other) {
             var diff = other.subtract(this);
 
-            if (diff.maxAbs() == 2) {
+            if (diff.maxAbs() >= 2) {
                 return new Vector2i(x + Integer.signum(diff.x), y + Integer.signum(diff.y));
             }
 
