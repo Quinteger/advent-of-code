@@ -28,17 +28,7 @@ public class Day09 extends Solution {
             var diff = other.subtract(this);
 
             if (diff.maxAbs() == 2) {
-                if (diff.x == 2) {
-                    return new Vector2i(x + 1, y + clampTo1(diff.y));
-                } else if (diff.x == -2) {
-                    return new Vector2i(x - 1, y + clampTo1(diff.y));
-                } else if (diff.y == 2) {
-                    return new Vector2i(x + clampTo1(diff.x), y + 1);
-                } else if (diff.y == -2) {
-                    return new Vector2i(x + clampTo1(diff.x), y - 1);
-                } else {
-                    throw new RuntimeException();
-                }
+                return new Vector2i(x + clampTo1(diff.x), y + clampTo1(diff.y));
             }
 
             return this;
@@ -50,6 +40,15 @@ public class Day09 extends Solution {
 
         public int maxAbs() {
             return Math.max(Math.abs(x), Math.abs(y));
+        }
+
+        private static int clampTo1(int value) {
+            if (value < -1) {
+                return -1;
+            } else if (value > 1) {
+                return 1;
+            }
+            return value;
         }
     }
 
@@ -100,14 +99,5 @@ public class Day09 extends Solution {
         }
 
         return tailPositions.size();
-    }
-
-    private static int clampTo1(int value) {
-        if (value < -1) {
-            return -1;
-        } else if (value > 1) {
-            return 1;
-        }
-        return value;
     }
 }
