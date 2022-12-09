@@ -13,8 +13,39 @@ public class Day09 extends Solution {
     }
 
     private record Vector2i(int x, int y) {
-        public int taxicabDistance(Vector2i other) {
-            return Math.max(Math.abs(x - other.x), Math.abs(y - other.y));
+
+        public Vector2i move(String direction) {
+            if (direction.equals("U")) {
+                return new Vector2i(x, y + 1);
+            } else if (direction.equals("D")) {
+                return new Vector2i(x, y - 1);
+            } else if (direction.equals("R")) {
+                return new Vector2i(x + 1, y);
+            } else if (direction.equals("L")) {
+                return new Vector2i(x - 1, y);
+            } else {
+                throw new IllegalArgumentException();
+            }
+        }
+
+        public Vector2i moveTo(Vector2i other) {
+            var diff = other.subtract(this);
+
+            if (diff.maxAbs() == 2) {
+                if (diff.x == 2) {
+                    return new Vector2i(x + 1, y + clampTo1(diff.y));
+                } else if (diff.x == -2) {
+                    return new Vector2i(x - 1, y + clampTo1(diff.y));
+                } else if (diff.y == 2) {
+                    return new Vector2i(x + clampTo1(diff.x), y + 1);
+                } else if (diff.y == -2) {
+                    return new Vector2i(x + clampTo1(diff.x), y - 1);
+                } else {
+                    throw new RuntimeException();
+                }
+            }
+
+            return this;
         }
 
         public Vector2i subtract(Vector2i other) {
@@ -37,43 +68,13 @@ public class Day09 extends Solution {
             String direction = parts[0];
             int count = Integer.parseInt(parts[1]);
             for (int i = 0; i < count; i++) {
-                headPosition = move(headPosition, direction, 1);
-                var diff = headPosition.subtract(tailPosition);
-
-                if (diff.maxAbs() == 2) {
-                    if (diff.x == 2) {
-                        tailPosition = new Vector2i(tailPosition.x + 1, tailPosition.y + diff.y);
-                    } else if (diff.x == -2) {
-                        tailPosition = new Vector2i(tailPosition.x - 1, tailPosition.y + diff.y);
-                    } else if (diff.y == 2) {
-                        tailPosition = new Vector2i(tailPosition.x + diff.x, tailPosition.y + 1);
-                    } else if (diff.y == -2) {
-                        tailPosition = new Vector2i(tailPosition.x + diff.x, tailPosition.y - 1);
-                    } else {
-                        throw new RuntimeException();
-                    }
-                }
-
+                headPosition = headPosition.move(direction);
+                tailPosition = tailPosition.moveTo(headPosition);
                 tailPositions.add(tailPosition);
             }
         }
 
         return tailPositions.size();
-    }
-
-    private static Vector2i move(Vector2i position, String direction, int amount) {
-        if (direction.equals("U")) {
-            position = new Vector2i(position.x, position.y + amount);
-        } else if (direction.equals("D")) {
-            position = new Vector2i(position.x, position.y - amount);
-        } else if (direction.equals("R")) {
-            position = new Vector2i(position.x + amount, position.y);
-        } else if (direction.equals("L")) {
-            position = new Vector2i(position.x - amount, position.y);
-        } else {
-            throw new IllegalArgumentException();
-        }
-        return position;
     }
 
     @Override
@@ -92,10 +93,10 @@ public class Day09 extends Solution {
             String direction = parts[0];
             int count = Integer.parseInt(parts[1]);
             for (int i = 0; i < count; i++) {
-                positions.set(0, move(positions.get(0), direction, 1));
+                positions.set(0, positions.get(0).move(direction));
 
                 for (int j = 1; j < positions.size(); j++) {
-                    positions.set(j, moveTailToHead(positions.get(j), positions.get(j - 1)));
+                    positions.set(j, positions.get(j).moveTo(positions.get(j - 1)));
                 }
 
                 tailPositions.add(positions.get(positions.size() - 1));
@@ -105,27 +106,12 @@ public class Day09 extends Solution {
         return tailPositions.size();
     }
 
-    private static Vector2i moveTailToHead(Vector2i tail, Vector2i head) {
-        var diff = head.subtract(tail);
-
-        if (diff.maxAbs() == 2) {
-            if (diff.x == 2) {
-                tail = new Vector2i(tail.x + 1, tail.y + clamp(-1, diff.y, 1));
-            } else if (diff.x == -2) {
-                tail = new Vector2i(tail.x - 1, tail.y + clamp(-1, diff.y, 1));
-            } else if (diff.y == 2) {
-                tail = new Vector2i(tail.x + clamp(-1, diff.x, 1), tail.y + 1);
-            } else if (diff.y == -2) {
-                tail = new Vector2i(tail.x + clamp(-1, diff.x, 1), tail.y - 1);
-            } else {
-                throw new RuntimeException();
-            }
+    private static int clampTo1(int value) {
+        if (value < -1) {
+            return -1;
+        } else if (value > 1) {
+            return 1;
         }
-
-        return tail;
-    }
-
-    private static int clamp(int min, int value, int max) {
-        return value < min ? min : Math.min(value, max);
+        return value;
     }
 }
