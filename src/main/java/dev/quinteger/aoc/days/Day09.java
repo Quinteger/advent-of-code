@@ -28,7 +28,7 @@ public class Day09 extends Solution {
             var diff = other.subtract(this);
 
             if (diff.maxAbs() == 2) {
-                return new Vector2i(x + clampTo1(diff.x), y + clampTo1(diff.y));
+                return new Vector2i(x + Integer.signum(diff.x), y + Integer.signum(diff.y));
             }
 
             return this;
@@ -40,15 +40,6 @@ public class Day09 extends Solution {
 
         public int maxAbs() {
             return Math.max(Math.abs(x), Math.abs(y));
-        }
-
-        private static int clampTo1(int value) {
-            if (value < -1) {
-                return -1;
-            } else if (value > 1) {
-                return 1;
-            }
-            return value;
         }
     }
 
