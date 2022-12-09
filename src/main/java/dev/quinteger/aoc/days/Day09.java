@@ -15,17 +15,13 @@ public class Day09 extends Solution {
     private record Vector2i(int x, int y) {
 
         public Vector2i move(String direction) {
-            if (direction.equals("U")) {
-                return new Vector2i(x, y + 1);
-            } else if (direction.equals("D")) {
-                return new Vector2i(x, y - 1);
-            } else if (direction.equals("R")) {
-                return new Vector2i(x + 1, y);
-            } else if (direction.equals("L")) {
-                return new Vector2i(x - 1, y);
-            } else {
-                throw new IllegalArgumentException();
-            }
+            return switch (direction) {
+                case "U" -> new Vector2i(x, y + 1);
+                case "D" -> new Vector2i(x, y - 1);
+                case "R" -> new Vector2i(x + 1, y);
+                case "L" -> new Vector2i(x - 1, y);
+                default -> throw new IllegalArgumentException();
+            };
         }
 
         public Vector2i moveTo(Vector2i other) {
