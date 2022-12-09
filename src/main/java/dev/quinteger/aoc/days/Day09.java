@@ -72,9 +72,8 @@ public class Day09 extends Solution {
             positions.add(new Vector2i(0, 0));
         }
 
-        tailPositions.add(new Vector2i(0, 0));
-        for (int lineIndex = 0; lineIndex < input.size(); lineIndex++) {
-            String line = input.get(lineIndex);
+        tailPositions.add(positions.get(9));
+        for (String line : input) {
             var parts = line.split(" ");
             String direction = parts[0];
             int count = Integer.parseInt(parts[1]);
