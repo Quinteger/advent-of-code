@@ -2,16 +2,14 @@ package dev.quinteger.aoc.days;
 
 import dev.quinteger.aoc.Solution;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Day10 extends Solution {
     public Day10(List<String> input) {
         super(input);
     }
 
-    private final Map<Integer, Integer> cycleToRegister = new HashMap<>();
+    private final SortedMap<Integer, Integer> cycleToRegister = new TreeMap<>();
 
     @Override
     public Object solvePart1() {
