@@ -55,7 +55,7 @@ public class Day10 extends Solution {
 
     private static void draw(int cycle, int register) {
         int rowPosition = (cycle - 1) % 40;
-        if (register >= rowPosition - 1 && register <= rowPosition + 1) {
+        if (Math.abs(register - rowPosition) <= 1) {
             System.out.print("█");
         } else {
             System.out.print(" ");
