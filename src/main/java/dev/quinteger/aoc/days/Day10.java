@@ -9,7 +9,7 @@ public class Day10 extends Solution {
         super(input);
     }
 
-    private final Map<Integer, Integer> cycleToRegister = new HashMap<>();
+    private final Map<Integer, Integer> cycleToRegister = new TreeMap<>();
 
     @Override
     public Object solvePart1() {
@@ -49,9 +49,7 @@ public class Day10 extends Solution {
 
     @Override
     public Object solvePart2() {
-        cycleToRegister.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
-                .forEach(e -> draw(e.getKey(), e.getValue()));
+        cycleToRegister.forEach(Day10::draw);
         return "see above";
     }
 
