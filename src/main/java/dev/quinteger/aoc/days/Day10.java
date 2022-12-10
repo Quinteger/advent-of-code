@@ -19,22 +19,26 @@ public class Day10 extends Solution {
         for (String line : input) {
             var split = line.split(" ");
             var op = split[0];
+            int cycles;
+            int toAdd;
+
             if (op.equals("noop")) {
+                cycles = 1;
+                toAdd = 0;
+            } else if (op.equals("addx")) {
+                cycles = 2;
+                toAdd = Integer.parseInt(split[1]);
+            } else {
+                throw new RuntimeException();
+            }
+
+            for (int i = 0; i < cycles; i++) {
                 cycle++;
                 sum += add(cycle, register);
                 cycleToRegister.put(cycle, register);
-            } else if (op.equals("addx")) {
-                int toAdd = Integer.parseInt(split[1]);
-                for (int i = 0; i < 2; i++) {
-                    cycle++;
-                    sum += add(cycle, register);
-                    cycleToRegister.put(cycle, register);
-                    if (i == 1) {
-                        register += toAdd;
-                    }
+                if (i == 1) {
+                    register += toAdd;
                 }
-            } else {
-                throw new RuntimeException();
             }
         }
         return sum;
