@@ -54,13 +54,13 @@ public class Day10 extends Solution {
             if (op.equals("noop")) {
                 cycle++;
                 sum += add(cycle, register);
-                draw(register, cycle);
+                draw(cycle, register);
             } else if (op.equals("addx")) {
                 int toAdd = Integer.parseInt(split[1]);
                 for (int i = 0; i < 2; i++) {
                     cycle++;
                     sum += add(cycle, register);
-                    draw(register, cycle);
+                    draw(cycle, register);
                     if (i == 1) {
                         register += toAdd;
                     }
@@ -72,7 +72,7 @@ public class Day10 extends Solution {
         return sum;
     }
 
-    private static void draw(int register, int cycle) {
+    private static void draw(int cycle, int register) {
         int rowPosition = (cycle - 1) % 40;
         if (register >= rowPosition - 1 && register <= rowPosition + 1) {
             System.out.print("#");
