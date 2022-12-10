@@ -60,10 +60,10 @@ public class Day10 extends Solution {
                 for (int i = 0; i < 2; i++) {
                     cycle++;
                     sum += add(cycle, register);
+                    draw(register, cycle);
                     if (i == 1) {
                         register += toAdd;
                     }
-                    draw(register, cycle);
                 }
             } else {
                 throw new RuntimeException();
@@ -73,14 +73,14 @@ public class Day10 extends Solution {
     }
 
     private static void draw(int register, int cycle) {
-        cycle = cycle % 40;
-        if (cycle % 40 == 0) {
-            System.out.println();
-        }
-        if (register >= cycle - 1 && register <= cycle + 1) {
+        int rowPosition = (cycle - 1) % 40;
+        if (register >= rowPosition - 1 && register <= rowPosition + 1) {
             System.out.print("#");
         } else {
             System.out.print(".");
+        }
+        if (cycle % 40 == 0) {
+            System.out.println();
         }
     }
 }
