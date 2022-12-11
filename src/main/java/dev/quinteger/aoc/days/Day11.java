@@ -76,7 +76,7 @@ public class Day11 extends Solution {
 
         if (optimize) {
             lcm = monkeys.values().stream()
-                    .mapToLong(e -> e.divisionTest)
+                    .mapToLong(Monkey::divisionTest)
                     .reduce((a, b) -> a * b)
                     .orElseThrow();
         } else {
