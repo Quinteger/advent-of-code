@@ -105,7 +105,7 @@ public class Day11 extends Solution {
                     if (!optimize) {
                         newItem = newItem / 3;
                     }
-                    int newMonkey = newItem % monkey.divisionTest == 0 ? monkey.ifTrue() : monkey.ifFalse();
+                    int newMonkey = newItem % monkey.divisionTest() == 0 ? monkey.ifTrue() : monkey.ifFalse();
                     monkeys.get(newMonkey).addLastItem(newItem % lcm);
                 }
             }
