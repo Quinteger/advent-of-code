@@ -110,6 +110,9 @@ public class Day11 extends Solution {
                 }
             }
         }
-        return inspections.values().stream().sorted(Comparator.reverseOrder()).limit(2).reduce(1L, (a, b) -> a * b, (a, b) -> a * b);
+        return inspections.values().stream()
+                .sorted(Comparator.reverseOrder())
+                .limit(2)
+                .reduce(1L, (a, b) -> a * b, (a, b) -> a * b);
     }
 }
