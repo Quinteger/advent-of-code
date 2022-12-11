@@ -96,10 +96,11 @@ public class Day11 extends Solution {
                     } else {
                         parsedOperationValue = Long.parseLong(operationValue);
                     }
-                    long newItem = switch (monkey.operation()) {
+                    String operation = monkey.operation();
+                    long newItem = switch (operation) {
                         case "+" -> item + parsedOperationValue;
                         case "*" -> item * parsedOperationValue;
-                        default -> throw new IllegalStateException("Unexpected operation: " + monkey.operation());
+                        default -> throw new IllegalStateException("Unexpected operation: " + operation);
                     };
                     inspections.merge(monkeyId, 1, Integer::sum);
                     if (!optimize) {
