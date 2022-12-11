@@ -28,7 +28,7 @@ public class Day11 extends Solution {
     }
 
     private final Map<Integer, Monkey> monkeys = new TreeMap<>();
-    private final Map<Integer, Long> inspections = new HashMap<>();
+    private final Map<Integer, Integer> inspections = new HashMap<>();
 
     @Override
     public Object solvePart1() {
@@ -102,7 +102,7 @@ public class Day11 extends Solution {
                         default -> throw new IllegalStateException("Unexpected operation: " + monkey.operation);
                     };
                     if (!inspections.containsKey(monkeyId)) {
-                        inspections.put(monkeyId, 1L);
+                        inspections.put(monkeyId, 1);
                     } else {
                         inspections.put(monkeyId, inspections.get(monkeyId) + 1);
                     }
@@ -117,6 +117,6 @@ public class Day11 extends Solution {
                 }
             }
         }
-        return inspections.values().stream().sorted(Comparator.reverseOrder()).limit(2).reduce(1L, (a, b) -> a * b);
+        return inspections.values().stream().sorted(Comparator.reverseOrder()).limit(2).reduce(1L, (a, b) -> a * b, (a, b) -> a * b);
     }
 }
