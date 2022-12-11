@@ -89,31 +89,24 @@ public class Day11 extends Solution {
                 var monkey = monkeyEntry.getValue();
                 while (monkey.hasItems()) {
                     long item = monkey.removeFirstItem();
-                    long value;
-                    String operationValue = monkey.operationValue;
+                    long parsedOperationValue;
+                    String operationValue = monkey.operationValue();
                     if (operationValue.equals("old")) {
-                        value = item;
+                        parsedOperationValue = item;
                     } else {
-                        value = Long.parseLong(operationValue);
+                        parsedOperationValue = Long.parseLong(operationValue);
                     }
-                    long newItem = switch (monkey.operation) {
-                        case "+" -> item + value;
-                        case "*" -> item * value;
-                        default -> throw new IllegalStateException("Unexpected operation: " + monkey.operation);
+                    long newItem = switch (monkey.operation()) {
+                        case "+" -> item + parsedOperationValue;
+                        case "*" -> item * parsedOperationValue;
+                        default -> throw new IllegalStateException("Unexpected operation: " + monkey.operation());
                     };
-                    if (!inspections.containsKey(monkeyId)) {
-                        inspections.put(monkeyId, 1);
-                    } else {
-                        inspections.put(monkeyId, inspections.get(monkeyId) + 1);
-                    }
+                    inspections.merge(monkeyId, 1, Integer::sum);
                     if (!optimize) {
                         newItem = newItem / 3;
                     }
-                    if (newItem % monkey.divisionTest == 0) {
-                        monkeys.get(monkey.ifTrue).addLastItem(newItem % lcm);
-                    } else {
-                        monkeys.get(monkey.ifFalse).addLastItem(newItem % lcm);
-                    }
+                    int newMonkey = newItem % monkey.divisionTest == 0 ? monkey.ifTrue() : monkey.ifFalse();
+                    monkeys.get(newMonkey).addLastItem(newItem % lcm);
                 }
             }
         }
