@@ -82,16 +82,16 @@ public class Day12 extends Solution {
     }
 
     private int find(Point from, Point to, BiPredicate<Point, Point> elevationChecker, ToIntFunction<Map<Point, Integer>> mapper) {
-        var unvisited = new HashSet<Point>();
-        var tentative = new HashMap<Point, Integer>();
+        var unvisited = new HashSet<Point>(map.length * map[0].length);
+        var values = new HashMap<Point, Integer>(map.length * map[0].length);
 
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
                 var point = new Point(i, j);
                 if (point.equals(from)) {
-                    tentative.put(point, 0);
+                    values.put(point, 0);
                 } else {
-                    tentative.put(point, Integer.MAX_VALUE);
+                    values.put(point, Integer.MAX_VALUE);
                 }
                 unvisited.add(point);
             }
@@ -109,21 +109,21 @@ public class Day12 extends Solution {
                     default -> throw new RuntimeException();
                 };
                 if (isInsideMap(newPoint) && elevationChecker.test(currentPoint, newPoint) && unvisited.contains(newPoint)) {
-                    int oldValue = tentative.get(newPoint);
-                    int newValue = tentative.get(currentPoint) + 1;
+                    int oldValue = values.get(newPoint);
+                    int newValue = values.get(currentPoint) + 1;
                     if (newValue < oldValue) {
-                        tentative.put(newPoint, newValue);
+                        values.put(newPoint, newValue);
                     }
                 }
             }
             unvisited.remove(currentPoint);
-            currentPoint = unvisited.stream().filter(p -> tentative.get(p) != Integer.MAX_VALUE).min(Comparator.comparingInt(tentative::get)).orElse(null);
+            currentPoint = unvisited.stream().filter(p -> values.get(p) != Integer.MAX_VALUE).min(Comparator.comparingInt(values::get)).orElse(null);
         }
 
         if (to != null) {
-            return tentative.get(to);
+            return values.get(to);
         } else if (mapper != null){
-            return mapper.applyAsInt(tentative);
+            return mapper.applyAsInt(values);
         } else {
             throw new RuntimeException();
         }
