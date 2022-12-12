@@ -2,7 +2,14 @@ package dev.quinteger.aoc.days;
 
 import dev.quinteger.aoc.Solution;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.ToIntFunction;
 
@@ -82,8 +89,9 @@ public class Day12 extends Solution {
     }
 
     private int find(Point from, Point to, BiPredicate<Point, Point> elevationChecker, ToIntFunction<Map<Point, Integer>> mapper) {
-        var unvisited = new HashSet<Point>(map.length * map[0].length);
-        var values = new HashMap<Point, Integer>(map.length * map[0].length);
+        Set<Point> visited = new HashSet<>(map.length * map[0].length);
+        Map<Point, Integer> values = new HashMap<>(map.length * map[0].length);
+        Deque<Point> queue = new ArrayDeque<>();
 
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
@@ -93,13 +101,16 @@ public class Day12 extends Solution {
                 } else {
                     values.put(point, Integer.MAX_VALUE);
                 }
-                unvisited.add(point);
             }
         }
 
-        var currentPoint = from;
-        Point newPoint;
-        while (currentPoint != null) {
+        queue.add(from);
+        while (!queue.isEmpty()) {
+            Point currentPoint = queue.removeFirst();
+            if (!visited.add(currentPoint)) {
+                continue;
+            }
+            Point newPoint;
             for (int i = 0; i < 4; i++) {
                 newPoint = switch (i) {
                     case 0 -> currentPoint.up();
@@ -108,16 +119,15 @@ public class Day12 extends Solution {
                     case 3 -> currentPoint.right();
                     default -> throw new RuntimeException();
                 };
-                if (isInsideMap(newPoint) && elevationChecker.test(currentPoint, newPoint) && unvisited.contains(newPoint)) {
+                if (isInsideMap(newPoint) && elevationChecker.test(currentPoint, newPoint) && !visited.contains(newPoint)) {
                     int oldValue = values.get(newPoint);
                     int newValue = values.get(currentPoint) + 1;
                     if (newValue < oldValue) {
                         values.put(newPoint, newValue);
+                        queue.addLast(newPoint);
                     }
                 }
             }
-            unvisited.remove(currentPoint);
-            currentPoint = unvisited.stream().filter(p -> values.get(p) != Integer.MAX_VALUE).min(Comparator.comparingInt(values::get)).orElse(null);
         }
 
         if (to != null) {
