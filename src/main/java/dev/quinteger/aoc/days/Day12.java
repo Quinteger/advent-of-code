@@ -3,6 +3,8 @@ package dev.quinteger.aoc.days;
 import dev.quinteger.aoc.Solution;
 
 import java.util.*;
+import java.util.function.BiPredicate;
+import java.util.function.ToIntFunction;
 
 public class Day12 extends Solution {
     public Day12(List<String> input) {
@@ -51,52 +53,7 @@ public class Day12 extends Solution {
 
     @Override
     public Object solvePart1() {
-        for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[i].length; j++) {
-//                System.out.print("%02d  ".formatted(map[i][j]));
-                var point = new Point(i, j);
-                if (i == startRow && j == startColumn) {
-                    tentative.put(point, 0);
-                } else {
-                    tentative.put(point, Integer.MAX_VALUE);
-                }
-                unvisited.add(point);
-            }
-//            System.out.println();
-        }
-
-        var currentPoint = new Point(startRow, startColumn);
-        var destination = new Point(endRow, endColumn);
-        Point newPoint;
-        while (currentPoint != null) {
-            for (int i = 0; i < 4; i++) {
-                newPoint = switch (i) {
-                    case 0 -> currentPoint.up();
-                    case 1 -> currentPoint.down();
-                    case 2 -> currentPoint.left();
-                    case 3 -> currentPoint.right();
-                    default -> throw new RuntimeException();
-                };
-                if (isInsideMap(newPoint) && isGoodElevationChange(currentPoint, newPoint) && unvisited.contains(newPoint)) {
-                    int oldValue = tentative.get(newPoint);
-                    int newValue = tentative.get(currentPoint) + 1;
-                    if (newValue < oldValue) {
-                        tentative.put(newPoint, newValue);
-                    }
-                }
-            }
-            unvisited.remove(currentPoint);
-            currentPoint = unvisited.stream().min(Comparator.comparingInt(tentative::get)).orElse(null);
-        }
-        return tentative.get(destination);
-    }
-    private final Set<Point> unvisited = new HashSet<>();
-    private final Map<Point, Integer> tentative = new HashMap<>();
-
-    private boolean isInsideMap(Point point) {
-        int row = point.row();
-        int column = point.column();
-        return row >= 0 && row < map.length && column >= 0 && column < map[row].length;
+        return find(new Point(startRow, startColumn), new Point(endRow, endColumn), this::isGoodElevationChange, null);
     }
 
     private boolean isGoodElevationChange(Point from, Point to) {
@@ -107,23 +64,40 @@ public class Day12 extends Solution {
 
     @Override
     public Object solvePart2() {
-        unvisited.clear();
-        tentative.clear();
+        return find(new Point(endRow, endColumn), null, this::isGoodElevationChangeReversed, tentative ->
+                tentative.entrySet().stream()
+                        .filter(e -> {
+                            var point = e.getKey();
+                            int row = point.row();
+                            int column = point.column();
+                            return map[row][column] == 0;
+                        })
+                        .min(Comparator.comparingInt(Map.Entry::getValue))
+                        .map(Map.Entry::getValue)
+                        .orElseThrow(RuntimeException::new));
+    }
+
+    private boolean isGoodElevationChangeReversed(Point from, Point to) {
+        return isGoodElevationChange(to, from);
+    }
+
+    private int find(Point from, Point to, BiPredicate<Point, Point> elevationChecker, ToIntFunction<Map<Point, Integer>> mapper) {
+        var unvisited = new HashSet<Point>();
+        var tentative = new HashMap<Point, Integer>();
+
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
-//                System.out.print("%02d  ".formatted(map[i][j]));
                 var point = new Point(i, j);
-                if (i == endRow && j == endColumn) {
+                if (point.equals(from)) {
                     tentative.put(point, 0);
                 } else {
                     tentative.put(point, Integer.MAX_VALUE);
                 }
                 unvisited.add(point);
             }
-//            System.out.println();
         }
 
-        var currentPoint = new Point(endRow, endColumn);
+        var currentPoint = from;
         Point newPoint;
         while (currentPoint != null) {
             for (int i = 0; i < 4; i++) {
@@ -134,9 +108,8 @@ public class Day12 extends Solution {
                     case 3 -> currentPoint.right();
                     default -> throw new RuntimeException();
                 };
-                if (isInsideMap(newPoint) && isGoodElevationChange2(currentPoint, newPoint) && unvisited.contains(newPoint)) {
+                if (isInsideMap(newPoint) && elevationChecker.test(currentPoint, newPoint) && unvisited.contains(newPoint)) {
                     int oldValue = tentative.get(newPoint);
-                    System.out.printf("Current point %s has value %d%n", currentPoint, tentative.get(currentPoint));
                     int newValue = tentative.get(currentPoint) + 1;
                     if (newValue < oldValue) {
                         tentative.put(newPoint, newValue);
@@ -144,23 +117,21 @@ public class Day12 extends Solution {
                 }
             }
             unvisited.remove(currentPoint);
-            System.out.printf("Unvisited has %d points%n", unvisited.size());
             currentPoint = unvisited.stream().filter(p -> tentative.get(p) != Integer.MAX_VALUE).min(Comparator.comparingInt(tentative::get)).orElse(null);
         }
-        return tentative.entrySet().stream()
-                .filter(e -> {
-                    var point = e.getKey();
-                    int row = point.row();
-                    int column = point.column();
-                    return map[row][column] == 0;
-                })
-                .min(Comparator.comparingInt(Map.Entry::getValue))
-                .orElseThrow(RuntimeException::new);
+
+        if (to != null) {
+            return tentative.get(to);
+        } else if (mapper != null){
+            return mapper.applyAsInt(tentative);
+        } else {
+            throw new RuntimeException();
+        }
     }
 
-    private boolean isGoodElevationChange2(Point from, Point to) {
-        int elevationFrom = map[from.row()][from.column()];
-        int elevationTo = map[to.row()][to.column()];
-        return elevationTo >= elevationFrom - 1;
+    private boolean isInsideMap(Point point) {
+        int row = point.row();
+        int column = point.column();
+        return row >= 0 && row < map.length && column >= 0 && column < map[row].length;
     }
 }
