@@ -26,7 +26,7 @@ public class Day13 extends Solution {
                 if (o instanceof List<?>) {
                     l = (List<Object>) o;
                 } else {
-                    throw new RuntimeException("Expected a list or null, but got " + o);
+                    throw new RuntimeException("Expected a list, but got " + o);
                 }
             }
             int key = keys.get(keys.size() - 1);
