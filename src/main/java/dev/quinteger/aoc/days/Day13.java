@@ -114,8 +114,9 @@ public class Day13 extends Solution {
     private static Packet createPacket(String line) {
         Packet packet = new Packet();
         Map<Integer, Integer> groups = new TreeMap<>();
-        int currentDepth = 0;
+        int currentDepth = -1;
         int currentGroup = 0;
+        boolean endOfPacketReached = false;
         var chars = line.toCharArray();
         for (int i = 0; i < chars.length; i++) {
             char c = chars[i];
@@ -123,14 +124,22 @@ public class Day13 extends Solution {
                 currentGroup++;
                 groups.put(currentDepth, currentGroup);
             } else if (c == '[') {
-                groups.put(currentDepth, currentGroup);
+                if (endOfPacketReached) {
+                    throw new RuntimeException("Multiple packets on a line");
+                } else if (currentDepth >= 0) {
+                    groups.put(currentDepth, currentGroup);
+                }
                 currentDepth++;
                 currentGroup = 0;
                 groups.put(currentDepth, currentGroup);
             } else if (c == ']') {
                 currentDepth--;
-                currentGroup = groups.get(currentDepth);
-                packet.ensureListExists(groups.values().stream().toList());
+                if (currentDepth >= 0) {
+                    currentGroup = groups.get(currentDepth);
+                    packet.ensureListExists(groups.values().stream().toList());
+                } else {
+                    endOfPacketReached = true;
+                }
             } else if (Character.isDigit(c)) {
                 int numberStart = i;
                 c = chars[i + 1];
@@ -163,10 +172,10 @@ public class Day13 extends Solution {
         int index6 = 0;
         for (int i = 0; i < packets.size(); i++) {
             Packet packet = packets.get(i);
-            if (packet.list.equals(List.of(List.of(List.of(2))))) {
+            if (packet.list.equals(List.of(List.of(2)))) {
                 index2 = i + 1;
             }
-            if (packet.list.equals(List.of(List.of(List.of(6))))) {
+            if (packet.list.equals(List.of(List.of(6)))) {
                 index6 = i + 1;
             }
         }
