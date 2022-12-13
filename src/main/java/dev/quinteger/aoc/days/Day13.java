@@ -2,10 +2,6 @@ package dev.quinteger.aoc.days;
 
 import dev.quinteger.aoc.Solution;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -107,9 +103,6 @@ public class Day13 extends Solution {
             var packet1 = createPacket(input.get(lineIndex));
             var packet2 = createPacket(input.get(lineIndex + 1));
             pairIndex++;
-            System.out.println(packet1);
-            System.out.println(packet2);
-            System.out.println(packet1.compareTo(packet2));
             int result = packet1.compareTo(packet2);
             if (result < 0) {
                 sum += pairIndex;
@@ -157,32 +150,26 @@ public class Day13 extends Solution {
     @Override
     public Object solvePart2() {
         List<Packet> packets = new ArrayList<>();
-        for (int lineIndex = 0; lineIndex < input.size(); lineIndex++) {
-            var line = input.get(lineIndex);
+        for (String line : input) {
             if (!line.isEmpty()) {
-                var packet = createPacket(input.get(lineIndex));
+                var packet = createPacket(line);
                 packets.add(packet);
             }
         }
         packets.add(createPacket("[[2]]"));
         packets.add(createPacket("[[6]]"));
         packets.sort(Packet::compareTo);
-        try (var writer = Files.newBufferedWriter(Path.of("result.txt"), StandardOpenOption.CREATE)) {
-            for (int i = 0; i < packets.size(); i++) {
-                Packet packet = packets.get(i);
-                writer.write(packet.toString());
-                writer.newLine();
-                if (packet.list.equals(Collections.singletonList(Collections.singletonList(Collections.singletonList(2))))) {
-                    System.out.println(i + 1);
-                }
-                if (packet.list.equals(Collections.singletonList(Collections.singletonList(Collections.singletonList(6))))) {
-                    System.out.println(i + 1);
-                }
+        int index2 = 0;
+        int index6 = 0;
+        for (int i = 0; i < packets.size(); i++) {
+            Packet packet = packets.get(i);
+            if (packet.list.equals(List.of(List.of(List.of(2))))) {
+                index2 = i + 1;
             }
-            writer.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            if (packet.list.equals(List.of(List.of(List.of(6))))) {
+                index6 = i + 1;
+            }
         }
-        return null;
+        return index2 * index6;
     }
 }
