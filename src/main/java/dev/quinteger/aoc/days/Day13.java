@@ -3,7 +3,6 @@ package dev.quinteger.aoc.days;
 import dev.quinteger.aoc.Solution;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -55,38 +54,31 @@ public class Day13 extends Solution {
 
         @Override
         public int compareTo(Packet o) {
-            return comesBefore(this.list, o.list);
+            return compare(this.list, o.list);
         }
 
-        @SuppressWarnings("unchecked")
-        private static int comesBefore(Object o1, Object o2) {
+        private static int compare(Object o1, Object o2) {
             if (o1 instanceof Integer i1 && o2 instanceof Integer i2) {
                 return i1.compareTo(i2);
             } else if (o1 instanceof List<?> l1 && o2 instanceof List<?> l2) {
-                List<Object> list1 = (List<Object>) l1;
-                List<Object> list2 = (List<Object>) l2;
-                int endIndex = Math.max(list1.size(), list2.size());
+                int endIndex = Math.max(l1.size(), l2.size());
                 for (int i = 0; i < endIndex; i++) {
-                    if (i >= list1.size()) {
+                    if (i >= l1.size()) {
                         return -1;
-                    } else if (i >= list2.size()) {
+                    } else if (i >= l2.size()) {
                         return 1;
                     } else {
-                        var e1 = list1.get(i);
-                        var e2 = list2.get(i);
-                        int result = comesBefore(e1, e2);
+                        var e1 = l1.get(i);
+                        var e2 = l2.get(i);
+                        int result = compare(e1, e2);
                         if (result != 0) {
                             return result;
                         }
                     }
                 }
                 return 0;
-            } else if (o1 instanceof List<?> list) {
-                return comesBefore(list, Collections.singletonList(o2));
-            } else if (o2 instanceof List<?> list) {
-                return comesBefore(Collections.singletonList(o1), list);
             }
-            throw new RuntimeException("Comparing %s and %s".formatted(o1, o2));
+            return compare(o1 instanceof List<?> ? o1 : List.of(o1), o2 instanceof List<?> ? o2 : List.of(o2));
         }
 
         @Override
