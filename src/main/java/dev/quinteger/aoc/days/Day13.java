@@ -57,10 +57,9 @@ public class Day13 extends Solution {
             return compare(this.list, o.list);
         }
 
+        @SuppressWarnings("unchecked")
         private static int compare(Object o1, Object o2) {
-            if (o1 instanceof Integer i1 && o2 instanceof Integer i2) {
-                return i1.compareTo(i2);
-            } else if (o1 instanceof List<?> l1 && o2 instanceof List<?> l2) {
+            if (o1 instanceof List<?> l1 && o2 instanceof List<?> l2) {
                 int endIndex = Math.max(l1.size(), l2.size());
                 for (int i = 0; i < endIndex; i++) {
                     if (i >= l1.size()) {
@@ -77,8 +76,14 @@ public class Day13 extends Solution {
                     }
                 }
                 return 0;
+            } else if (o1 instanceof List<?> l1) {
+                return compare(l1, List.of(o2));
+            } else if (o2 instanceof List<?> l2) {
+                return compare(List.of(o1), l2);
+            } else if (o1.getClass() == o2.getClass() && o1 instanceof Comparable<?> c1) {
+                return ((Comparable<Object>) c1).compareTo(o2);
             }
-            return compare(o1 instanceof List<?> ? o1 : List.of(o1), o2 instanceof List<?> ? o2 : List.of(o2));
+            throw new RuntimeException("Incomparable objects: %s of type %s and %s of type %s".formatted(o1, o1.getClass().getSimpleName(), o2, o2.getClass().getSimpleName()));
         }
 
         @Override
