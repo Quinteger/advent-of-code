@@ -61,20 +61,23 @@ public class Day14 extends Solution {
                     int min = Math.min(startRow, endRow);
                     int max = Math.max(startRow, endRow);
                     for (int j = min; j <= max; j++) {
-                        grid[j][startCol - originOffset + distance] = '#';
+                        grid[j][getRealColumn(startCol)] = '#';
                     }
                 } else if (startRow == endRow) {
                     int min = Math.min(startCol, endCol);
                     int max = Math.max(startCol, endCol);
                     for (int j = min; j <= max; j++) {
-                        grid[startRow][j - originOffset + distance] = '#';
+                        grid[startRow][getRealColumn(j)] = '#';
                     }
                 } else {
                     throw new RuntimeException();
                 }
             }
         }
-//        printGrid();
+    }
+
+    private int getRealColumn(int column) {
+        return column - originOffset + distance;
     }
 
     private void printGrid() {
@@ -108,7 +111,7 @@ public class Day14 extends Solution {
     }
 
     private Point spawnSand() {
-        var sandPrev = new Point(0, originOffset);
+        var sandPrev = origin;
         var sandNext = tryGoDown(sandPrev);
 
         while (!sandPrev.equals(sandNext) && sandNext != null) {
@@ -117,14 +120,14 @@ public class Day14 extends Solution {
         }
 
         if (sandNext != null) {
-            grid[sandNext.x()][sandNext.y() - originOffset + distance] = '0';
+            grid[sandNext.x()][getRealColumn(sandNext.y())] = '0';
         }
         return sandNext;
     }
 
     public Point tryGoDown(Point sand) {
         int realRow = sand.x();
-        int realCol = sand.y() - originOffset + distance;
+        int realCol = getRealColumn(sand.y());
         if (realRow >= grid.length - 1) {
             return null;
         } else if (grid[realRow + 1][realCol] == '.') {
@@ -157,5 +160,5 @@ public class Day14 extends Solution {
         return count;
     }
 
-    private record Point(int x, int y) { }
+    private record Point(int x, int y) {}
 }
