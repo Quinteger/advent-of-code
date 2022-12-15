@@ -6,8 +6,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 public class Day15 extends Solution {
     public Day15(List<String> input) {
@@ -74,18 +76,23 @@ public class Day15 extends Solution {
     public Object solvePart2() {
         final int min = 0;
         final int max = 4000000;
-        for (int i = min; i < max; i++) {
-            var previousPoint = new Point(min, i);
-            var nextPoint = previousPoint;
-            do {
-                previousPoint = nextPoint;
-                nextPoint = skipScanned(nextPoint);
-            } while (!nextPoint.equals(previousPoint) && nextPoint.x() <= max);
-            if (nextPoint.x() <= max) {
-                return nextPoint.x() * 4000000L + nextPoint.y();
-            }
-        }
-        return null;
+        return IntStream.rangeClosed(min, max)
+                .mapToObj(i -> {
+                    var previousPoint = new Point(min, i);
+                    var nextPoint = previousPoint;
+                    do {
+                        previousPoint = nextPoint;
+                        nextPoint = skipScanned(nextPoint);
+                    } while (!nextPoint.equals(previousPoint) && nextPoint.x() <= max);
+                    if (nextPoint.x() <= max) {
+                        return nextPoint;
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .findFirst()
+                .map(p -> p.x() * 4000000L + p.y())
+                .orElse(null);
     }
 
     private Point skipScanned(Point point) {
