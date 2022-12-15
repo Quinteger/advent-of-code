@@ -7,12 +7,8 @@ import java.util.Comparator;
 import java.util.List;
 
 public class Day01 extends Solution {
-    public Day01(List<String> input) {
-        super(input);
-    }
-
     @Override
-    public Object solvePart1() {
+    public Object solvePart1(List<String> input, boolean example) {
         int maxSum = 0;
         int currentSum = 0;
         for (int i = 0; i < input.size(); i++) {
@@ -33,7 +29,7 @@ public class Day01 extends Solution {
     }
 
     @Override
-    public Object solvePart2() {
+    public Object solvePart2(List<String> input, boolean example) {
         List<Integer> list = new ArrayList<>();
         int currentSum = 0;
         for (int i = 0; i < input.size(); i++) {

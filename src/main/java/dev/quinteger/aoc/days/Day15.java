@@ -12,13 +12,9 @@ import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 public class Day15 extends Solution {
-    public Day15(List<String> input) {
-        super(input);
-    }
-
     private static final Pattern pattern = Pattern.compile("^Sensor at x=(-?\\d+), y=(-?\\d+): closest beacon is at x=(-?\\d+), y=(-?\\d+)$");
 
-    private void fillMap() {
+    private void fillMap(List<String> input) {
         for (String line : input) {
             var matcher = pattern.matcher(line);
             if (matcher.find() && matcher.groupCount() == 4) {
@@ -44,9 +40,9 @@ public class Day15 extends Solution {
     private int maxX;
 
     @Override
-    public Object solvePart1() {
-        fillMap();
-        int row = 2000000;
+    public Object solvePart1(List<String> input, boolean example) {
+        fillMap(input);
+        int row = example ? 10 : 2_000_000;
         int count = 0;
         for (int i = minX; i <= maxX; i++) {
             var point = new Point(i, row);
@@ -73,9 +69,9 @@ public class Day15 extends Solution {
     }
 
     @Override
-    public Object solvePart2() {
+    public Object solvePart2(List<String> input, boolean example) {
         final int min = 0;
-        final int max = 4000000;
+        final int max = example ? 20 : 4_000_000;
         return IntStream.rangeClosed(min, max)
                 .mapToObj(i -> {
                     var previousPoint = new Point(min, i);

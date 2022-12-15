@@ -14,8 +14,28 @@ import java.util.function.BiPredicate;
 import java.util.function.ToIntFunction;
 
 public class Day12 extends Solution {
-    public Day12(List<String> input) {
-        super(input);
+    private int[][] map;
+    private int startRow;
+    private int startColumn;
+    private int endRow;
+    private int endColumn;
+
+    private record Point(int row, int column) {
+        public Point up() {
+            return new Point(row - 1, column);
+        }
+        public Point down() {
+            return new Point(row + 1, column);
+        }
+        public Point left() {
+            return new Point(row, column - 1);
+        }
+        public Point right() {
+            return new Point(row, column + 1);
+        }
+    }
+
+    private void createMap(List<String> input) {
         map = new int[input.size()][input.get(0).length()];
         for (int i = 0; i < input.size(); i++) {
             String line = input.get(i);
@@ -37,29 +57,9 @@ public class Day12 extends Solution {
         }
     }
 
-    private final int[][] map;
-    private int startRow;
-    private int startColumn;
-    private int endRow;
-    private int endColumn;
-
-    private record Point(int row, int column) {
-        public Point up() {
-            return new Point(row - 1, column);
-        }
-        public Point down() {
-            return new Point(row + 1, column);
-        }
-        public Point left() {
-            return new Point(row, column - 1);
-        }
-        public Point right() {
-            return new Point(row, column + 1);
-        }
-    }
-
     @Override
-    public Object solvePart1() {
+    public Object solvePart1(List<String> input, boolean example) {
+        createMap(input);
         return find(new Point(startRow, startColumn), new Point(endRow, endColumn), this::isGoodElevationChange, null);
     }
 
@@ -70,7 +70,7 @@ public class Day12 extends Solution {
     }
 
     @Override
-    public Object solvePart2() {
+    public Object solvePart2(List<String> input, boolean example) {
         return find(new Point(endRow, endColumn), null, this::isGoodElevationChangeReversed, tentative ->
                 tentative.entrySet().stream()
                         .filter(e -> {

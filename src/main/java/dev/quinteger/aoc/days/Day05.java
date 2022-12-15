@@ -9,10 +9,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class Day05 extends Solution {
-    public Day05(List<String> input) {
-        super(input);
-    }
-
     private static final int STACK_COUNT = 9;
     private static final int MOVE_START_LINE = 11;
 
@@ -23,8 +19,8 @@ public class Day05 extends Solution {
     }
 
     @Override
-    public Object solvePart1() {
-        return solveWithStackMover((stackFrom, stackTo, amount) -> {
+    public Object solvePart1(List<String> input, boolean example) {
+        return solveWithStackMover(input, (stackFrom, stackTo, amount) -> {
             for (int i = 0; i < amount; i++) {
                 stackTo.addFirst(stackFrom.removeFirst());
             }
@@ -32,8 +28,8 @@ public class Day05 extends Solution {
     }
 
     @Override
-    public Object solvePart2() {
-        return solveWithStackMover((stackFrom, stackTo, amount) -> {
+    public Object solvePart2(List<String> input, boolean example) {
+        return solveWithStackMover(input, (stackFrom, stackTo, amount) -> {
             var movedStack = new ArrayDeque<Character>();
             for (int i = 0; i < amount; i++) {
                 movedStack.addLast(stackFrom.removeFirst());
@@ -45,7 +41,7 @@ public class Day05 extends Solution {
         });
     }
 
-    private Object solveWithStackMover(StackMover stackMover) {
+    private Object solveWithStackMover(List<String> input, StackMover stackMover) {
         List<Deque<Character>> stacks = new ArrayList<>(STACK_COUNT);
         for (int i = 0; i < STACK_COUNT; i++) {
             stacks.add(new ArrayDeque<>());

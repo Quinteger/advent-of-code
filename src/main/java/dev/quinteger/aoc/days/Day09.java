@@ -8,10 +8,6 @@ import java.util.List;
 import java.util.Set;
 
 public class Day09 extends Solution {
-    public Day09(List<String> input) {
-        super(input);
-    }
-
     private record Vector2i(int x, int y) {
 
         public Vector2i move(String direction) {
@@ -44,7 +40,7 @@ public class Day09 extends Solution {
     }
 
     @Override
-    public Object solvePart1() {
+    public Object solvePart1(List<String> input, boolean example) {
         Set<Vector2i> tailPositions = new HashSet<>();
         var headPosition = new Vector2i(0, 0);
         var tailPosition = new Vector2i(0, 0);
@@ -64,7 +60,7 @@ public class Day09 extends Solution {
     }
 
     @Override
-    public Object solvePart2() {
+    public Object solvePart2(List<String> input, boolean example) {
         Set<Vector2i> tailPositions = new HashSet<>();
 
         List<Vector2i> positions = new ArrayList<>(10);

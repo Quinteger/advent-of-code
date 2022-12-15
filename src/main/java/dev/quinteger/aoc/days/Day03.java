@@ -6,12 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Day03 extends Solution {
-    public Day03(List<String> input) {
-        super(input);
-    }
-
     @Override
-    public Object solvePart1() {
+    public Object solvePart1(List<String> input, boolean example) {
         int sum = 0;
         for (String backpack : input) {
             var compartment1 = backpack.substring(0, backpack.length() / 2);
@@ -27,7 +23,7 @@ public class Day03 extends Solution {
     }
 
     @Override
-    public Object solvePart2() {
+    public Object solvePart2(List<String> input, boolean example) {
         int sum = 0;
         for (int i = 0; i < input.size(); i+=3) {
             var elf1Set = input.get(i).chars().boxed().collect(Collectors.toSet());

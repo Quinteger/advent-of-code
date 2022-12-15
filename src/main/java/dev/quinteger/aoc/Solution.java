@@ -1,46 +1,35 @@
 package dev.quinteger.aoc;
 
 import java.util.List;
-import java.util.function.Supplier;
-import java.util.regex.Pattern;
 
 public abstract class Solution {
-    private static final Pattern DAY_PATTERN = Pattern.compile("^Day(\\d{2})$");
-    protected final List<String> input;
-    private final int dayNumber;
+    public void solve(List<String> input, boolean example, String part1Answer, String part2Answer) {
+        long start;
+        long end;
+        String result;
 
-    public Solution(List<String> input) {
-        this.input = input;
-        var classname = this.getClass().getSimpleName();
-        var matcher = DAY_PATTERN.matcher(classname);
-        if (matcher.matches() && matcher.groupCount() > 0) {
-            var dayNumberString = matcher.group(1);
-            this.dayNumber = Integer.parseInt(dayNumberString);
+        start = System.nanoTime();
+        result = solvePart1(input, example).toString();
+        end = System.nanoTime();
+        if (!part1Answer.isEmpty() && !part1Answer.equals(result)) {
+            throw new RuntimeException("Wrong answer for part 1%s: expected %s, got %s".formatted(example ? " example" : "", part1Answer, result));
         } else {
-            this.dayNumber = 0;
+            System.out.printf("Part 1 solved in %s, answer: %s%s%n", formatNanos(end - start), result, part1Answer.isEmpty() ? "" : " (correct)");
+        }
+
+        start = System.nanoTime();
+        result = solvePart2(input, example).toString();
+        end = System.nanoTime();
+        if (!part2Answer.isEmpty() && !part2Answer.equals(result)) {
+            throw new RuntimeException("Wrong answer for part 2%s: expected %s, got %s".formatted(example ? " example" : "", part2Answer, result));
+        } else {
+            System.out.printf("Part 2 solved in %s, answer: %s%s%n", formatNanos(end - start), result, part2Answer.isEmpty() ? "" : " (correct)");
         }
     }
 
-    public void solve() {
-        if (dayNumber > 0) {
-            System.out.println("Firing solution for day " + dayNumber);
-        }
+    public abstract Object solvePart1(List<String> input, boolean example);
 
-        measureAndLog(this::solvePart1, 1);
-        measureAndLog(this::solvePart2, 2);
-    }
-
-    public abstract Object solvePart1();
-
-    public abstract Object solvePart2();
-
-    private static void measureAndLog(Supplier<?> supplier, int part) {
-        long start = System.nanoTime();
-        Object result = supplier.get();
-        long end = System.nanoTime();
-
-        System.out.printf("Part %d answer: %s, solved in %s%n", part, result, formatNanos(end - start));
-    }
+    public abstract Object solvePart2(List<String> input, boolean example);
 
     private static String formatNanos(long nanos) {
         if (nanos > 1_000_000_000) {

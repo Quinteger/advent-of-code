@@ -6,7 +6,11 @@ import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.*;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
@@ -15,46 +19,73 @@ public class AOCLauncher {
     private static final int MAX = 25;
 
     public static void main(String[] args) {
-        var arg = getArg(args);
-        int intArg = getIntArg(arg);
+//        var arg = getArg(args);
+//        int intArg = getIntArg(arg);
+        var builder = new SettingsBuilder();
+        for (int i = 0; i < args.length; i++) {
+            switch (args[i]) {
+                case "-y" -> {
+                    builder.setYear(Integer.parseInt(args[i + 1]));
+                    i++;
+                }
+                case "-d" -> {
+                    builder.setDay(Integer.parseInt(args[i + 1]));
+                    i++;
+                }
+                case "-u" -> {
+                    builder.setUser(args[i + 1]);
+                    i++;
+                }
+                default -> throw new IllegalArgumentException("Unknown config parameter: " + args[i]);
+            }
+        }
 
-        var suffix = "%02d".formatted(intArg);
+        var settings = builder.build();
+        System.out.printf("Firing solution for year %d, day %d%n", settings.year(), settings.day());
 
+        var suffix = "%02d".formatted(settings.day());
         Class<? extends Solution> solutionClass = getSolutionClass(suffix);
         Constructor<? extends Solution> constructor = getSolutionClassConstructor(solutionClass);
 
-        var fileName = "/day%s.txt".formatted(suffix);
+        Solution solution = createSolutionInstance(constructor);
 
-        URL url = AOCLauncher.class.getResource(fileName);
-        if (url == null) {
-            throw new RuntimeException("Resource %s does not exist".formatted(fileName));
-        }
+        String inputPath;
+        String solutionPath;
+        List<String> inputLines;
+        List<String> solutionLines;
 
-        URI uri;
-        try {
-            uri = url.toURI();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        inputPath = "/%d/day%s/input.txt".formatted(settings.year(), suffix);
+        solutionPath = "/%d/day%s/answer.txt".formatted(settings.year(), suffix);
 
-        List<String> lines;
-        var protocol = url.getProtocol();
-        if (protocol.equals("jar")) {
-            try (var fileSystem = createFileSystem(uri)) {
-                lines = Files.readAllLines(fileSystem.getPath(fileName));
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
+        inputLines = readLines(inputPath, false);
+        solutionLines = readLines(solutionPath, false);
+
+        if (!inputLines.isEmpty()) {
+            System.out.println("Firing example solution");
+            if (solutionLines.isEmpty()) {
+                solution.solve(inputLines, true, "", "");
+            } else if (solutionLines.size() == 2) {
+                solution.solve(inputLines, true, solutionLines.get(0), solutionLines.get(1));
+            } else {
+                throw new IllegalArgumentException("Solution file must have 2 lines");
             }
+        }
+
+        inputPath = "/%d/day%s/%s/input.txt".formatted(settings.year(), suffix, settings.user());
+        solutionPath = "/%d/day%s/%s/answer.txt".formatted(settings.year(), suffix, settings.user());
+
+        inputLines = readLines(inputPath, true);
+        solutionLines = readLines(solutionPath, false);
+
+        System.out.printf("Firing solution for user %s%n", settings.user());
+
+        if (solutionLines.isEmpty()) {
+            solution.solve(inputLines, false, "", "");
+        } else if (solutionLines.size() == 2) {
+            solution.solve(inputLines, false, solutionLines.get(0), solutionLines.get(1));
         } else {
-            try {
-                lines = Files.readAllLines(Path.of(uri));
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
+            throw new IllegalArgumentException("Solution file must have 2 lines");
         }
-
-        Solution solution = createSolutionInstance(constructor, lines);
-        solution.solve();
     }
 
     private static String getArg(String[] args) {
@@ -89,10 +120,71 @@ public class AOCLauncher {
 
     private static Constructor<? extends Solution> getSolutionClassConstructor(Class<? extends Solution> solutionClass) {
         try {
-            return solutionClass.getConstructor(List.class);
+            return solutionClass.getConstructor();
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("Class does not have the required constructor", e);
         }
+    }
+
+    private static List<String> readLines(String resource, boolean required) {
+        var lines = readResource(resource, Files::readAllLines, required);
+        if (lines == null) {
+            return Collections.emptyList();
+        }
+        else {
+            return Collections.unmodifiableList(lines);
+        }
+    }
+
+    private static String readString(String resource, boolean required) {
+        return readResource(resource, Files::readString, required);
+    }
+
+    private static <R> R readResource(String resource, ResourceReader<R> resourceReader, boolean required) {
+        URL url = AOCLauncher.class.getResource(resource);
+        if (url == null) {
+            if (required) {
+                throw new RuntimeException("Resource %s does not exist".formatted(resource));
+            } else {
+                return null;
+            }
+        }
+
+        URI uri;
+        try {
+            uri = url.toURI();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
+        R result;
+        var protocol = url.getProtocol();
+        if (protocol.equals("jar")) {
+            try (var fileSystem = createFileSystem(uri)) {
+                var path = fileSystem.getPath(resource);
+                if (!Files.isRegularFile(path)) {
+                    return null;
+                }
+                result = resourceReader.readResource(path);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        } else {
+            try {
+                var path = Path.of(uri);
+                if (!Files.isRegularFile(path)) {
+                    return null;
+                }
+                result = resourceReader.readResource(path);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+        return result;
+    }
+
+    private interface ResourceReader<R> {
+        R readResource(Path path) throws IOException;
     }
 
     private static FileSystem createFileSystem(URI uri) throws IOException {
@@ -103,9 +195,9 @@ public class AOCLauncher {
         }
     }
 
-    private static Solution createSolutionInstance(Constructor<? extends Solution> constructor, List<String> lines) {
+    private static Solution createSolutionInstance(Constructor<? extends Solution> constructor) {
         try {
-            return constructor.newInstance(lines);
+            return constructor.newInstance();
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException("Reflection error while trying to instantiate the solution class", e);
         }

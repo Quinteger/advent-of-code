@@ -6,10 +6,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class Day04 extends Solution {
-    public Day04(List<String> input) {
-        super(input);
-    }
-
     private static final Pattern PATTERN = Pattern.compile("^(\\d+)-(\\d+),(\\d+)-(\\d+)$");
 
     @FunctionalInterface
@@ -18,16 +14,16 @@ public class Day04 extends Solution {
     }
 
     @Override
-    public Object solvePart1() {
-        return solveWithPredicate((p1s, p1e, p2s, p2e) -> (p2s <= p1s && p1e <= p2e) || (p1s <= p2s && p2e <= p1e));
+    public Object solvePart1(List<String> input, boolean example) {
+        return solveWithPredicate(input, (p1s, p1e, p2s, p2e) -> (p2s <= p1s && p1e <= p2e) || (p1s <= p2s && p2e <= p1e));
     }
 
     @Override
-    public Object solvePart2() {
-        return solveWithPredicate((p1s, p1e, p2s, p2e) -> (p2s <= p1s && p1s <= p2e) || (p1s <= p2s && p2s <= p1e));
+    public Object solvePart2(List<String> input, boolean example) {
+        return solveWithPredicate(input, (p1s, p1e, p2s, p2e) -> (p2s <= p1s && p1s <= p2e) || (p1s <= p2s && p2s <= p1e));
     }
 
-    private Object solveWithPredicate(PairRangesPredicate predicate) {
+    private Object solveWithPredicate(List<String> input, PairRangesPredicate predicate) {
         int count = 0;
         for (String pair : input) {
             var matcher = PATTERN.matcher(pair);

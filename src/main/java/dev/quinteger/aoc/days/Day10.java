@@ -5,14 +5,10 @@ import dev.quinteger.aoc.Solution;
 import java.util.*;
 
 public class Day10 extends Solution {
-    public Day10(List<String> input) {
-        super(input);
-    }
-
     private final Map<Integer, Integer> cycleToRegister = new TreeMap<>();
 
     @Override
-    public Object solvePart1() {
+    public Object solvePart1(List<String> input, boolean example) {
         int cycle = 0;
         int register = 1;
         int sum = 0;
@@ -52,7 +48,7 @@ public class Day10 extends Solution {
     }
 
     @Override
-    public Object solvePart2() {
+    public Object solvePart2(List<String> input, boolean example) {
         cycleToRegister.forEach(Day10::draw);
         return "see above";
     }

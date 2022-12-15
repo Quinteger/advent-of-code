@@ -6,9 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Day14 extends Solution {
-    public Day14(List<String> input) {
-        super(input);
-    }
     private static final int originOffset = 500;
     private static final Point origin = new Point(0, originOffset);
 
@@ -42,7 +39,7 @@ public class Day14 extends Solution {
         }
     }
 
-    private void fillGrid() {
+    private void fillGrid(List<String> input) {
         emptyGrid();
         for (String line : input) {
             String[] points = line.split(" -> ");
@@ -91,8 +88,8 @@ public class Day14 extends Solution {
     }
 
     @Override
-    public Object solvePart1() {
-        fillGrid();
+    public Object solvePart1(List<String> input, boolean example) {
+        fillGrid(input);
 
         Point newPoint;
         int count = 0;
@@ -142,8 +139,8 @@ public class Day14 extends Solution {
     }
 
     @Override
-    public Object solvePart2() {
-        fillGrid();
+    public Object solvePart2(List<String> input, boolean example) {
+        fillGrid(input);
 
         Arrays.fill(grid[grid.length - 1], '#');
 

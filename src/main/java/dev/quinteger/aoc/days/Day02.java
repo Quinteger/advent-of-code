@@ -6,21 +6,17 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 public class Day02 extends Solution {
-    public Day02(List<String> input) {
-        super(input);
+    @Override
+    public Object solvePart1(List<String> input, boolean example) {
+        return solveWithMoveSelector(input, (move, c) -> Move.getResponseMove(c));
     }
 
     @Override
-    public Object solvePart1() {
-        return solveWithMoveSelector((move, c) -> Move.getResponseMove(c));
+    public Object solvePart2(List<String> input, boolean example) {
+        return solveWithMoveSelector(input, Move::pickMoveForOutcome);
     }
 
-    @Override
-    public Object solvePart2() {
-        return solveWithMoveSelector(Move::pickMoveForOutcome);
-    }
-
-    public Object solveWithMoveSelector(BiFunction<? super Move, ? super Character, ? extends Move> responseMoveSelector) {
+    public Object solveWithMoveSelector(List<String> input, BiFunction<? super Move, ? super Character, ? extends Move> responseMoveSelector) {
         return input.stream()
                 .map(String::toCharArray)
                 .map(chars -> {

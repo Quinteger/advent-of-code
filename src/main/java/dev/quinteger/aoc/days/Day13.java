@@ -8,10 +8,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class Day13 extends Solution {
-    public Day13(List<String> input) {
-        super(input);
-    }
-
     private static class Packet implements Comparable<Packet> {
         final List<Object> list = new ArrayList<>();
 
@@ -93,7 +89,7 @@ public class Day13 extends Solution {
     }
 
     @Override
-    public Object solvePart1() {
+    public Object solvePart1(List<String> input, boolean example) {
         int pairIndex = 0;
         int sum = 0;
         for (int lineIndex = 0; lineIndex < input.size(); lineIndex+=3) {
@@ -154,7 +150,7 @@ public class Day13 extends Solution {
     }
 
     @Override
-    public Object solvePart2() {
+    public Object solvePart2(List<String> input, boolean example) {
         List<Packet> packets = new ArrayList<>();
         for (String line : input) {
             if (!line.isEmpty()) {

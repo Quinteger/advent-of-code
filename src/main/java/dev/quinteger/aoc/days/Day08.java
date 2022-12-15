@@ -5,8 +5,11 @@ import dev.quinteger.aoc.Solution;
 import java.util.List;
 
 public class Day08 extends Solution {
-    public Day08(List<String> input) {
-        super(input);
+    private int[][] trees;
+    private int count = 0;
+    private int score = 0;
+
+    private void createTrees(List<String> input) {
         trees = new int[input.size()][input.get(0).length()];
         for (int i = 0; i < input.size(); i++) {
             String line = input.get(i);
@@ -16,12 +19,9 @@ public class Day08 extends Solution {
         }
     }
 
-    private final int[][] trees;
-    private int count = 0;
-    private int score = 0;
-
     @Override
-    public Object solvePart1() {
+    public Object solvePart1(List<String> input, boolean example) {
+        createTrees(input);
         for (int row = 0; row < trees.length; row++) {
             for (int column = 0; column < trees[row].length; column++) {
                 var treeInfo = getTreeInfo(trees, row, column);
@@ -87,7 +87,7 @@ public class Day08 extends Solution {
     }
 
     @Override
-    public Object solvePart2() {
+    public Object solvePart2(List<String> input, boolean example) {
         return score;
     }
 }

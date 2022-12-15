@@ -5,10 +5,6 @@ import dev.quinteger.aoc.Solution;
 import java.util.*;
 
 public class Day11 extends Solution {
-    public Day11(List<String> input) {
-        super(input);
-    }
-
     private record Monkey(int id, Deque<Long> items, String operation, String operationValue, int divisionTest, int ifTrue, int ifFalse) {
         public Monkey(int id, List<Long> items, String operation, String operationValue, int divisionTest, int ifTrue, int ifFalse) {
             this(id, new ArrayDeque<>(items), operation, operationValue, divisionTest, ifTrue, ifFalse);
@@ -31,16 +27,16 @@ public class Day11 extends Solution {
     private final Map<Integer, Integer> inspections = new HashMap<>();
 
     @Override
-    public Object solvePart1() {
-        return solveWithRounds(20, false);
+    public Object solvePart1(List<String> input, boolean example) {
+        return solveWithRounds(input, 20, false);
     }
 
     @Override
-    public Object solvePart2() {
-        return solveWithRounds(10000, true);
+    public Object solvePart2(List<String> input, boolean example) {
+        return solveWithRounds(input, 10000, true);
     }
 
-    private void loadMonkeys() {
+    private void loadMonkeys(List<String> input) {
         inspections.clear();
         monkeys.clear();
 
@@ -69,8 +65,8 @@ public class Day11 extends Solution {
         }
     }
 
-    private Object solveWithRounds(int rounds, boolean optimize) {
-        loadMonkeys();
+    private Object solveWithRounds(List<String> input, int rounds, boolean optimize) {
+        loadMonkeys(input);
 
         long lcm;
 

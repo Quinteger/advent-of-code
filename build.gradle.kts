@@ -27,7 +27,7 @@ for (day in 1..25) {
         classpath = sourceSets.main.get().runtimeClasspath
         mainClass.set("dev.quinteger.aoc.AOCLauncher")
         group = "solution"
-        args = listOf(day.toString())
+        args = listOf("-d", day.toString())
     }
 }
 

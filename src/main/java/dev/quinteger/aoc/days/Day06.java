@@ -5,24 +5,20 @@ import dev.quinteger.aoc.Solution;
 import java.util.List;
 
 public class Day06 extends Solution {
-    public Day06(List<String> input) {
-        super(input);
+    @Override
+    public Object solvePart1(List<String> input, boolean example) {
+        return solveForLength(input, 4);
     }
 
     @Override
-    public Object solvePart1() {
-        return solveForLength(4);
+    public Object solvePart2(List<String> input, boolean example) {
+        return solveForLength(input, 14);
     }
 
-    @Override
-    public Object solvePart2() {
-        return solveForLength(14);
-    }
-
-    private Object solveForLength(int length) {
-        var input = this.input.get(0);
-        for (int i = 0; i < input.length() - length + 1; i++) {
-            var substr = input.substring(i, i + length);
+    private Object solveForLength(List<String> input, int length) {
+        var line = input.get(0);
+        for (int i = 0; i < line.length() - length + 1; i++) {
+            var substr = line.substring(i, i + length);
             if (substr.chars().distinct().count() == length) {
                 return i + length;
             }

@@ -7,16 +7,12 @@ import java.util.List;
 import java.util.Map;
 
 public class Day07 extends Solution {
-    public Day07(List<String> input) {
-        super(input);
-    }
-
     private final Map<String, Integer> dirs = new HashMap<>();
 
     private static final int SIZE_THRESHOLD = 100_000;
 
     @Override
-    public Object solvePart1() {
+    public Object solvePart1(List<String> input, boolean example) {
         var currentDir = "/";
         for (String line : input) {
             var split = line.split(" ");
@@ -53,7 +49,7 @@ public class Day07 extends Solution {
     private static final int REQUIRED = 30_000_000;
 
     @Override
-    public Object solvePart2() {
+    public Object solvePart2(List<String> input, boolean example) {
         int unused = TOTAL_SIZE - dirs.get("/");
         int needToDelete = REQUIRED - unused;
         return dirs.entrySet().stream()
