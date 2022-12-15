@@ -107,18 +107,4 @@ public class Day15 extends Solution {
     }
 
     private record Point(int x, int y) {}
-    private record Interval(int min, int max) {
-        public Interval merge (Interval other) {
-            if (min <= other.min && other.max <= max) {
-                return this;
-            }
-            if (min <= other.min) {
-                return new Interval(min, other.max);
-            }
-            if (other.max <= max) {
-                return new Interval(other.min, max);
-            }
-            return other;
-        }
-    }
 }
