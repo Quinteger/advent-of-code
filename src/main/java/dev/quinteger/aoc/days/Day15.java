@@ -15,6 +15,8 @@ public class Day15 extends Solution {
     private static final Pattern pattern = Pattern.compile("^Sensor at x=(-?\\d+), y=(-?\\d+): closest beacon is at x=(-?\\d+), y=(-?\\d+)$");
 
     private void fillMap(List<String> input) {
+        sensors.clear();
+        beacons.clear();
         for (String line : input) {
             var matcher = pattern.matcher(line);
             if (matcher.find() && matcher.groupCount() == 4) {
