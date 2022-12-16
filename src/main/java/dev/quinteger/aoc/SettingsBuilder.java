@@ -5,7 +5,7 @@ import java.time.YearMonth;
 public class SettingsBuilder {
     private int year = YearMonth.now().minusMonths(11).getYear();
     private int day;
-    private String user = "quinteger";
+    private String user = null;
 
     public SettingsBuilder setYear(int year) {
         this.year = year;

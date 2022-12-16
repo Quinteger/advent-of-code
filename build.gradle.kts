@@ -26,8 +26,14 @@ for (day in 1..25) {
     tasks.register<JavaExec>(String.format("day%02d", day)) {
         classpath = sourceSets.main.get().runtimeClasspath
         mainClass.set("dev.quinteger.aoc.AOCLauncher")
-        group = "solution"
+        group = "solve"
         args = listOf("-d", day.toString())
+    }
+    tasks.register<JavaExec>(String.format("day%02d-quinteger", day)) {
+        classpath = sourceSets.main.get().runtimeClasspath
+        mainClass.set("dev.quinteger.aoc.AOCLauncher")
+        group = String.format("solve-user-quinteger")
+        args = listOf("-d", day.toString(), "-u", "quinteger")
     }
 }
 

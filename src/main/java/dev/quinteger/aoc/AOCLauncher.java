@@ -49,19 +49,30 @@ public class AOCLauncher {
 
         Solution solution = createSolutionInstance(constructor);
 
+
         String inputPath;
         String solutionPath;
-        List<String> inputLines;
-        List<String> solutionLines;
+        String message;
+//        List<String> inputLines;
+//        List<String> solutionLines;
 
-        inputPath = "/%d/day%s/input.txt".formatted(settings.year(), suffix);
-        solutionPath = "/%d/day%s/answer.txt".formatted(settings.year(), suffix);
+        String user = settings.user();
+        if (user == null) {
+            inputPath = "/%d/day%s/input.txt".formatted(settings.year(), suffix);
+            solutionPath = "/%d/day%s/answer.txt".formatted(settings.year(), suffix);
+            message = "Firing example solution";
+        } else {
+            inputPath = "/%d/day%s/%s/input.txt".formatted(settings.year(), suffix, settings.user());
+            solutionPath = "/%d/day%s/%s/answer.txt".formatted(settings.year(), suffix, settings.user());
+            message = "Firing solution for user " + user;
+        }
 
-        inputLines = readLines(inputPath, false);
-        solutionLines = readLines(solutionPath, false);
+
+        var inputLines = readLines(inputPath, true);
+        var solutionLines = readLines(solutionPath, false);
 
         if (!inputLines.isEmpty()) {
-            System.out.println("Firing example solution");
+            System.out.println(message);
             if (solutionLines.isEmpty()) {
                 solution.solve(inputLines, true, "", "");
             } else if (solutionLines.size() == 2) {
@@ -69,22 +80,6 @@ public class AOCLauncher {
             } else {
                 throw new IllegalArgumentException("Solution file must have 2 lines");
             }
-        }
-
-        inputPath = "/%d/day%s/%s/input.txt".formatted(settings.year(), suffix, settings.user());
-        solutionPath = "/%d/day%s/%s/answer.txt".formatted(settings.year(), suffix, settings.user());
-
-        inputLines = readLines(inputPath, true);
-        solutionLines = readLines(solutionPath, false);
-
-        System.out.printf("Firing solution for user %s%n", settings.user());
-
-        if (solutionLines.isEmpty()) {
-            solution.solve(inputLines, false, "", "");
-        } else if (solutionLines.size() == 2) {
-            solution.solve(inputLines, false, solutionLines.get(0), solutionLines.get(1));
-        } else {
-            throw new IllegalArgumentException("Solution file must have 2 lines");
         }
     }
 
