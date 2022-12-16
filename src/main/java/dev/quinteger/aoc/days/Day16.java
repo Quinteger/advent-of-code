@@ -47,14 +47,16 @@ public class Day16 extends Solution {
 
     private int maxPressure = 0;
 
+    private static final int part1MinuteCap = 30;
+
     private void find(List<String> path, Deque<String> activePath, Map<String, Boolean> valveStates, int currentMinute, int pressureReleased) {
         int pressureReleaseSpeed = valveStates.entrySet().stream().mapToInt(e -> e.getValue() ? valves.get(e.getKey()).pressure() : 0).sum();
         pressureReleased += pressureReleaseSpeed;
         currentMinute++;
-        if (currentMinute >= 30) {
+        if (currentMinute >= part1MinuteCap) {
             if (pressureReleased > maxPressure) {
-                System.out.println(path);
-                System.out.println(pressureReleased);
+//                System.out.println(path);
+//                System.out.println(pressureReleased);
                 maxPressure = pressureReleased;
             }
             return;
@@ -86,20 +88,19 @@ public class Day16 extends Solution {
         } else {
             var valvesToVisit = valveStates.entrySet().stream().filter(e -> !e.getValue()).map(Map.Entry::getKey).toList();
             int finalCurrentMinute = currentMinute;
-            int approxPossiblePressure = valvesToVisit.stream().mapToInt(v -> valves.get(v).pressure() * (30 - finalCurrentMinute)).sum();
-            if (pressureReleased + approxPossiblePressure + pressureReleaseSpeed * (30 - currentMinute) < maxPressure) {
+            int approxPossiblePressure = valvesToVisit.stream().mapToInt(v -> valves.get(v).pressure() * (part1MinuteCap - finalCurrentMinute)).sum();
+            pressureReleaseSpeed = valveStates.entrySet().stream().mapToInt(e -> e.getValue() ? valves.get(e.getKey()).pressure() : 0).sum();
+            if (pressureReleased + approxPossiblePressure + pressureReleaseSpeed * (part1MinuteCap - currentMinute) < maxPressure) {
 //                System.out.println("CULL FAST: " + path);
-                culls++;
                 return;
             }
-            var searchData = getSearchData(currentValve, valvesToVisit, currentMinute);
+            var searchData = getSearchData(currentValve, valvesToVisit, currentMinute, 30);
             if (searchData.isEmpty()) {
                 find(path, activePath, valveStates, currentMinute, pressureReleased);
             }
 //            var maximumPossiblePressure = searchData.values().stream().mapToInt(SearchData::possiblePressure).sum();
-//            if (pressureReleased + maximumPossiblePressure + pressureReleaseSpeed * (30 - currentMinute) < maxPressure) {
+//            if (pressureReleased + maximumPossiblePressure + pressureReleaseSpeed * (part1MinuteCap - currentMinute) < maxPressure) {
 //                System.out.println("CULL: " + path);
-//                culls++;
 //                return;
 //            }
             for (var searchDataValue : searchData.values()) {
@@ -113,12 +114,10 @@ public class Day16 extends Solution {
         }
     }
 
-    private int culls = 0;
-
     private record ValvePair(String from, String to) {}
     private final Map<ValvePair, Deque<String>> paths = new HashMap<>();
 
-    private Deque<String> finaPathBetweenValves(String from, String to) {
+    private Deque<String> findPathBetweenValves(String from, String to) {
         return paths.computeIfAbsent(new ValvePair(from, to), vp -> {
             var f = vp.from();
             var t = vp.to();
@@ -127,13 +126,11 @@ public class Day16 extends Solution {
             if (f.equals(t)) {
                 return path;
             }
-            var foo =  finaPathBetweenValvesRecursive(t, path, Set.of(f));
-            System.out.printf("Produced path from %s to %s: %s%n", f, t, foo);
-            return foo;
+            return findPathBetweenValvesRecursive(t, path, Set.of(f));
         });
     }
 
-    private Deque<String> finaPathBetweenValvesRecursive(String to, Deque<String> path, Set<String> visited) {
+    private Deque<String> findPathBetweenValvesRecursive(String to, Deque<String> path, Set<String> visited) {
         var neighbours = valves.get(path.getLast()).paths().stream().filter(p -> !visited.contains(p)).toList();
         if (neighbours.isEmpty()) {
             return null;
@@ -150,7 +147,7 @@ public class Day16 extends Solution {
                 var newVisited = new HashSet<>(visited);
                 newVisited.add(neighbour);
 
-                var newSearch = finaPathBetweenValvesRecursive(to, newPath, newVisited);
+                var newSearch = findPathBetweenValvesRecursive(to, newPath, newVisited);
 
                 if (newSearch != null && newSearch.size() < length) {
                     foundPath = newSearch;
@@ -162,17 +159,14 @@ public class Day16 extends Solution {
     }
 
     private Map<String, Deque<String>> getPaths(String currentValve, Collection<String> toVisit) {
-        return toVisit.stream().collect(Collectors.toMap(Function.identity(), v -> finaPathBetweenValves(currentValve, v), (m1, m2) -> m2, HashMap::new));
+        return toVisit.stream().collect(Collectors.toMap(Function.identity(), v -> findPathBetweenValves(currentValve, v), (m1, m2) -> m2, HashMap::new));
     }
 
-    private Map<String, SearchData> getSearchData(String currentValve, Collection<String> toVisit, int minute) {
-        return valves.entrySet().stream()
-                .filter(e -> e.getValue().pressure() > 0)
-                .filter(e -> toVisit.contains(e.getKey()))
-                .filter(e -> !e.getKey().equals(currentValve))
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> {
-                    var path = finaPathBetweenValves(currentValve, e.getKey());
-                    return new SearchData(path, (30 - minute - path.size()) * e.getValue().pressure());
+    private Map<String, SearchData> getSearchData(String currentValve, Collection<String> toVisit, int minute, int minuteCap) {
+        return toVisit.stream()
+                .collect(Collectors.toMap(Function.identity(), v -> {
+                    var path = findPathBetweenValves(currentValve, v);
+                    return new SearchData(path, (minuteCap - minute - path.size()) * valves.get(v).pressure());
                 }));
     }
 
@@ -180,7 +174,6 @@ public class Day16 extends Solution {
     public Object solvePart1(List<String> input, boolean example) {
         paths.clear();
         maxPressure = 0;
-        culls = 0;
         parseValves(input);
         var path = new ArrayList<String>();
         path.add("AA");
@@ -189,7 +182,6 @@ public class Day16 extends Solution {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toMap(Function.identity(), v -> false, (v1, v2) -> false, HashMap::new));
         find(path, new ArrayDeque<>(), states, 0, 0);
-        System.out.println(culls);
         return maxPressure;
     }
 
@@ -198,7 +190,6 @@ public class Day16 extends Solution {
     @Override
     public Object solvePart2(List<String> input, boolean example) {
         maxPressure = 0;
-        culls = 0;
         var humanPath = new ArrayList<String>();
         var elephantPath = new ArrayList<String>();
         humanPath.add("AA");
@@ -207,38 +198,23 @@ public class Day16 extends Solution {
                 .filter(e -> e.getValue().pressure() > 0)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toMap(Function.identity(), v -> false, (v1, v2) -> false, HashMap::new));
-        findForTwo(humanPath, new ArrayDeque<>(), elephantPath, new ArrayDeque<>(), states, 0, 0, new HashMap<>());
-        System.out.println(culls);
+        findForTwo(humanPath, new ArrayDeque<>(), elephantPath, new ArrayDeque<>(), states, 0, 0);
         return maxPressure;
     }
 
     private record ValveStatistics(Map<String, Boolean> valveStates, int pressureReleaseSpeed, int pressure) {}
 
-    private void validate(List<String> path) {
-        for (int i = 0; i < path.size() - 1; i++) {
-            var from = path.get(i).toUpperCase();
-            var to = path.get(i + 1).toUpperCase();
-            if (!from.equals(to) && !valves.get(from).paths().contains(to)) {
-                throw new RuntimeException();
-            }
-        }
-    }
-
     private void findForTwo(List<String> humanPath, Deque<String> humanActivePath, List<String> elephantPath, Deque<String> elephantActivePath,
-                            Map<String, Boolean> valveStates, int currentMinute, int pressureReleased, Map<Integer, ValveStatistics> stats) {
+                            Map<String, Boolean> valveStates, int currentMinute, int pressureReleased) {
         int pressureReleaseSpeed = valveStates.entrySet().stream().mapToInt(e -> e.getValue() ? valves.get(e.getKey()).pressure() : 0).sum();
         pressureReleased += pressureReleaseSpeed;
         currentMinute++;
-        stats.put(currentMinute, new ValveStatistics(new HashMap<>(valveStates), pressureReleaseSpeed, pressureReleased));
 
         if (currentMinute >= 26) {
             if (pressureReleased > maxPressure) {
-                System.out.println(humanPath);
-                System.out.println(elephantPath);
-                System.out.println(pressureReleased);
-                System.out.println(stats);
-                validate(humanPath);
-                validate(elephantPath);
+//                System.out.println(humanPath);
+//                System.out.println(elephantPath);
+//                System.out.println(pressureReleased);
                 maxPressure = pressureReleased;
             }
             return;
@@ -287,12 +263,12 @@ public class Day16 extends Solution {
         }
 
         if (humanFlag && elephantFlag) {
-            findForTwo(humanPath, humanActivePath, elephantPath, elephantActivePath, valveStates, currentMinute, pressureReleased, stats);
+            findForTwo(humanPath, humanActivePath, elephantPath, elephantActivePath, valveStates, currentMinute, pressureReleased);
             return;
         }
 
         if (valveStates.values().stream().allMatch(v -> v)) {
-            findForTwo(humanPath, humanActivePath, elephantPath, elephantActivePath, valveStates, currentMinute, pressureReleased, stats);
+            findForTwo(humanPath, humanActivePath, elephantPath, elephantActivePath, valveStates, currentMinute, pressureReleased);
         } else {
             var valvesToVisit = valveStates.entrySet().stream().filter(e -> !e.getValue()).map(Map.Entry::getKey).collect(Collectors.toCollection(HashSet::new));
 
@@ -301,7 +277,6 @@ public class Day16 extends Solution {
             pressureReleaseSpeed = valveStates.entrySet().stream().mapToInt(e -> e.getValue() ? valves.get(e.getKey()).pressure() : 0).sum();
             if (pressureReleased + approxPossiblePressure + pressureReleaseSpeed * (26 - currentMinute) < maxPressure) {
 //                System.out.println("CULL FAST: " + path);
-                culls++;
                 return;
             }
 
@@ -317,14 +292,14 @@ public class Day16 extends Solution {
             }
 
             if (valvesToVisit.isEmpty()) {
-                findForTwo(humanPath, humanActivePath, elephantPath, elephantActivePath, valveStates, currentMinute, pressureReleased, stats);
+                findForTwo(humanPath, humanActivePath, elephantPath, elephantActivePath, valveStates, currentMinute, pressureReleased);
             } else if (!humanFlag && !elephantFlag) {
                 for (String humanTarget : valvesToVisit) {
                     var elephantTargets = new HashSet<>(valvesToVisit);
                     elephantTargets.remove(humanTarget);
                     for (String elephantTarget : elephantTargets) {
-                        var humanActivePathCopy = new ArrayDeque<>(finaPathBetweenValves(currentHumanValve, humanTarget));
-                        var elephantActivePathCopy = new ArrayDeque<>(finaPathBetweenValves(currentElephantValve, elephantTarget));
+                        var humanActivePathCopy = new ArrayDeque<>(findPathBetweenValves(currentHumanValve, humanTarget));
+                        var elephantActivePathCopy = new ArrayDeque<>(findPathBetweenValves(currentElephantValve, elephantTarget));
                         humanActivePathCopy.removeFirst();
                         elephantActivePathCopy.removeFirst();
 
@@ -334,12 +309,12 @@ public class Day16 extends Solution {
                         elephantPathCopy.add(elephantActivePathCopy.removeFirst());
 
                         var valveStatesCopy = new HashMap<>(valveStates);
-                        findForTwo(humanPathCopy, humanActivePathCopy, elephantPathCopy, elephantActivePathCopy, valveStatesCopy, currentMinute, pressureReleased, new HashMap<>(stats));
+                        findForTwo(humanPathCopy, humanActivePathCopy, elephantPathCopy, elephantActivePathCopy, valveStatesCopy, currentMinute, pressureReleased);
                     }
                 }
             } else if (!humanFlag) {
                 for (String humanTarget : valvesToVisit) {
-                    var humanActivePathCopy = new ArrayDeque<>(finaPathBetweenValves(currentHumanValve, humanTarget));
+                    var humanActivePathCopy = new ArrayDeque<>(findPathBetweenValves(currentHumanValve, humanTarget));
                     humanActivePathCopy.removeFirst();
                     var elephantActivePathCopy = new ArrayDeque<>(elephantActivePath);
 
@@ -348,11 +323,11 @@ public class Day16 extends Solution {
                     var elephantPathCopy = new ArrayList<>(elephantPath);
 
                     var valveStatesCopy = new HashMap<>(valveStates);
-                    findForTwo(humanPathCopy, humanActivePathCopy, elephantPathCopy, elephantActivePathCopy, valveStatesCopy, currentMinute, pressureReleased, new HashMap<>(stats));
+                    findForTwo(humanPathCopy, humanActivePathCopy, elephantPathCopy, elephantActivePathCopy, valveStatesCopy, currentMinute, pressureReleased);
                 }
             } else {
                 for (String elephantTarget : valvesToVisit) {
-                    var elephantActivePathCopy = new ArrayDeque<>(finaPathBetweenValves(currentElephantValve, elephantTarget));
+                    var elephantActivePathCopy = new ArrayDeque<>(findPathBetweenValves(currentElephantValve, elephantTarget));
                     elephantActivePathCopy.removeFirst();
                     var humanActivePathCopy = new ArrayDeque<>(humanActivePath);
 
@@ -361,7 +336,7 @@ public class Day16 extends Solution {
                     var humanPathCopy = new ArrayList<>(humanPath);
 
                     var valveStatesCopy = new HashMap<>(valveStates);
-                    findForTwo(humanPathCopy, humanActivePathCopy, elephantPathCopy, elephantActivePathCopy, valveStatesCopy, currentMinute, pressureReleased, new HashMap<>(stats));
+                    findForTwo(humanPathCopy, humanActivePathCopy, elephantPathCopy, elephantActivePathCopy, valveStatesCopy, currentMinute, pressureReleased);
                 }
             }
         }
