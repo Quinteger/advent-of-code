@@ -192,8 +192,8 @@ public class Day17 extends Solution {
             if (movements.containsKey(start)) {
                 var prevResult = movements.get(start);
                 if(prevResult.equals(result)) {
-                    System.out.println("Result match: " + start + ", " + result);
-                    System.out.println("Piece index: " + pieceIndex);
+//                    System.out.println("Result match: " + start + ", " + result);
+//                    System.out.println("Piece index: " + pieceIndex);
                     if (checks.containsKey(start) && checks.get(start)) {
                         break;
                     } else {
