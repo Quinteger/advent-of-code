@@ -3,8 +3,10 @@ package dev.quinteger.aoc.days;
 import dev.quinteger.aoc.Solution;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Day17 extends Solution {
     private static final int pieceCount = 2022;
@@ -59,7 +61,7 @@ public class Day17 extends Solution {
                 towerMaxHeight = pieceTopPoint + 1;
             }
         }
-//        printGrid();
+        printGrid();
         return towerMaxHeight;
     }
 
@@ -102,28 +104,13 @@ public class Day17 extends Solution {
             }
         }
         this.grid = newGrid;
-//        char[][] oldGrid = grid;
-//        int necessaryTotalGridHeight = y + 2;
-//        int currentTotalGridHeight = oldGrid.length + hiddenRows;
-//        int addRows = necessaryTotalGridHeight - currentTotalGridHeight;
-//        if (addRows <= 0) {
-//            return;
-//        }
-//        int maxVisible = 0;
-//        for (int i = 0; i < oldGrid.length; i++) {
-//            for (int j = 1; j < 8; j++) {
-//                if (grid[i][j] != '.') {
-//                    break;
-//                }
-//            }
-//            maxVisible++;
-//        }
-
     }
 
     private record FallStart(int pieceType, int inputStartIndex) {}
 
     private record FallResult(int moveX, int moveDown, int inputCount, int towerGrowth) {}
+
+    private static final long bigPieceCount = 1_000_000_000_000L;
 
     @Override
     public Object solvePart2(List<String> input, boolean example) {
@@ -134,7 +121,7 @@ public class Day17 extends Solution {
         char[] inputs = input.get(0).toCharArray();
         int jetIndex = 0;
         Map<FallStart, FallResult> movements = new LinkedHashMap<>();
-        Map<FallStart, Boolean> checks = new LinkedHashMap<>();
+        Set<FallStart> checks = new LinkedHashSet<>();
         long pieceIndex = 0;
         for (; ; pieceIndex++) {
             int pieceType = (int) (pieceIndex % 5);
@@ -189,18 +176,11 @@ public class Day17 extends Solution {
             }
 
             var result = new FallResult(moveX, moveDown, inputCount, towerGrowth);
-            if (movements.containsKey(start)) {
-                var prevResult = movements.get(start);
-                if(prevResult.equals(result)) {
-//                    System.out.println("Result match: " + start + ", " + result);
-//                    System.out.println("Piece index: " + pieceIndex);
-                    if (checks.containsKey(start) && checks.get(start)) {
-                        break;
-                    } else {
-                        checks.put(start, true);
-                    }
+            if (movements.containsKey(start) && movements.get(start).equals(result)) {
+                if (checks.contains(start)) {
+                    break;
                 } else {
-                    checks.put(start, false);
+                    checks.add(start);
                 }
             } else {
                 checks.clear();
@@ -211,11 +191,11 @@ public class Day17 extends Solution {
         long repeatingIntervalSize = checks.size();
         long repeatingIntervalStart = pieceIndex - repeatingIntervalSize * 2;
         long repeatingIntervalEnd = repeatingIntervalStart + repeatingIntervalSize - 1;
-        long towerGrowthPerInterval = checks.keySet().stream().mapToInt(start -> movements.get(start).towerGrowth()).sum();
+        long towerGrowthPerInterval = checks.stream().mapToInt(start -> movements.get(start).towerGrowth()).sum();
         System.out.println("First repeating piece has index " + repeatingIntervalStart);
         System.out.println("Last repeating piece has index " + repeatingIntervalEnd);
         System.out.println("Tower growth per interval " + towerGrowthPerInterval);
-        long remainingPieces = 1_000_000_000_000L - piecesFit;
+        long remainingPieces = bigPieceCount - piecesFit;
         System.out.println("Pieces already fit: " + piecesFit);
         System.out.println("Pieces to fit: " + remainingPieces);
         long towerHeight = towerMaxHeight;
@@ -225,9 +205,9 @@ public class Day17 extends Solution {
         towerHeight += intervalsToFit * towerGrowthPerInterval;
         pieceIndex += intervalsToFit * repeatingIntervalSize;
         piecesFit += intervalsToFit * repeatingIntervalSize;
-        remainingPieces = 1_000_000_000_000L - piecesFit;
+        remainingPieces = bigPieceCount - piecesFit;
         System.out.printf("After fitting intervals: %d pieces fit, %d remaining, tower height %d%n", piecesFit, remainingPieces, towerHeight);
-        var itr = checks.keySet().iterator();
+        var itr = checks.iterator();
         for (long i = 0; i <= remainingPieces; i++) {
             var next = itr.next();
             if (i == 0) {

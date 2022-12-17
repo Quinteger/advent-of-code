@@ -53,8 +53,6 @@ public class AOCLauncher {
         String inputPath;
         String solutionPath;
         String message;
-//        List<String> inputLines;
-//        List<String> solutionLines;
 
         String user = settings.user();
         if (user == null) {
