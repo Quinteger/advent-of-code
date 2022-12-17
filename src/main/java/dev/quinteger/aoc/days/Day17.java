@@ -2,22 +2,40 @@ package dev.quinteger.aoc.days;
 
 import dev.quinteger.aoc.Solution;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Day17 extends Solution {
     private static final int pieceCount = 2022;
     private char[][] grid;
-    private int towerHeight = 0;
+    private int towerMaxHeight = 0;
+    private int hiddenRows = 0;
 
     @Override
     public Object solvePart1(List<String> input, boolean example) {
+        grid = null;
+        towerMaxHeight = 0;
         initializeGrid();
+//        printGrid();
         char[] inputs = input.get(0).toCharArray();
-        for (int i = 0; i < 1; i++) {
-            int spawnHeight = getSpawnHeight();
-            resizeGridForHeight(spawnHeight);
-            RockPiece piece = new HorizontalPiece(new Point(2, spawnHeight));
-            for (char c : inputs) {
+        int jetIndex = 0;
+        for (int i = 0; i < pieceCount; i++) {
+            int pieceIndex = i % 5;
+            int spawnY = getSpawnY();
+//            RockPiece piece = new HorizontalPiece(new Point(2, spawnHeight));
+            RockPiece piece = switch (pieceIndex) {
+                case 0 -> new HorizontalPiece(2, spawnY);
+                case 1 -> new CrossPiece(2, spawnY);
+                case 2 -> new ReverseLPiece(2, spawnY);
+                case 3 -> new VerticalPiece(2, spawnY);
+                case 4 -> new CubePiece(2, spawnY);
+                default -> throw new RuntimeException();
+            };
+            resizeGridForY(spawnY + piece.getBoundingHeight() - 1);
+
+            while (true){
+                char c = inputs[jetIndex];
                 if (c == '<') {
                     piece.tryMoveLeft(grid);
                 } else if (c == '>') {
@@ -25,16 +43,39 @@ public class Day17 extends Solution {
                 } else {
                     throw new RuntimeException("Incorrect input");
                 }
-                if (piece.tryMoveDown(grid)) {
+                jetIndex++;
+                jetIndex = jetIndex % inputs.length;
+
+                boolean down = piece.tryMoveDown(grid);
+                if (!down) {
                     break;
                 }
             }
+
+            piece.addToGrid(grid);
+//            printGrid();
+            int pieceTopPoint = piece.getBottomY() + piece.getBoundingHeight() - 1;
+            if (pieceTopPoint + 1 > towerMaxHeight) {
+                towerMaxHeight = pieceTopPoint + 1;
+            }
         }
-        return null;
+//        printGrid();
+        return towerMaxHeight;
     }
 
-    private int getSpawnHeight() {
-        return towerHeight + 3;
+    private void printGrid() {
+        for (char[] chars : grid) {
+            for (char c : chars) {
+                System.out.print(c);
+//                System.out.print(c);
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+
+    private int getSpawnY() {
+        return towerMaxHeight + 3;
     }
 
     private void initializeGrid() {
@@ -43,11 +84,12 @@ public class Day17 extends Solution {
         for (int i = 0; i < 4; i++) {
             grid[i] = new char[] {'#', '.', '.', '.', '.', '.', '.', '.', '#'};
         }
+        hiddenRows = 0;
     }
 
-    private void resizeGridForHeight(int height) {
+    private void resizeGridForY(int y) {
         char[][] oldGrid = grid;
-        int newHeight = Math.max(oldGrid.length, height + 2);
+        int newHeight = Math.max(oldGrid.length, y + 2);
         if (newHeight <= oldGrid.length) {
             return;
         }
@@ -60,11 +102,143 @@ public class Day17 extends Solution {
             }
         }
         this.grid = newGrid;
+//        char[][] oldGrid = grid;
+//        int necessaryTotalGridHeight = y + 2;
+//        int currentTotalGridHeight = oldGrid.length + hiddenRows;
+//        int addRows = necessaryTotalGridHeight - currentTotalGridHeight;
+//        if (addRows <= 0) {
+//            return;
+//        }
+//        int maxVisible = 0;
+//        for (int i = 0; i < oldGrid.length; i++) {
+//            for (int j = 1; j < 8; j++) {
+//                if (grid[i][j] != '.') {
+//                    break;
+//                }
+//            }
+//            maxVisible++;
+//        }
+
     }
+
+    private record FallStart(int pieceType, int inputStartIndex) {}
+
+    private record FallResult(int moveX, int moveDown, int inputCount, int towerGrowth) {}
 
     @Override
     public Object solvePart2(List<String> input, boolean example) {
-        return null;
+        grid = null;
+        towerMaxHeight = 0;
+        initializeGrid();
+//        printGrid();
+        char[] inputs = input.get(0).toCharArray();
+        int jetIndex = 0;
+        Map<FallStart, FallResult> movements = new LinkedHashMap<>();
+        Map<FallStart, Boolean> checks = new LinkedHashMap<>();
+        long pieceIndex = 0;
+        for (; ; pieceIndex++) {
+            int pieceType = (int) (pieceIndex % 5);
+            int spawnY = getSpawnY();
+//            RockPiece piece = new HorizontalPiece(new Point(2, spawnHeight));
+            RockPiece piece = switch (pieceType) {
+                case 0 -> new HorizontalPiece(2, spawnY);
+                case 1 -> new CrossPiece(2, spawnY);
+                case 2 -> new ReverseLPiece(2, spawnY);
+                case 3 -> new VerticalPiece(2, spawnY);
+                case 4 -> new CubePiece(2, spawnY);
+                default -> throw new RuntimeException();
+            };
+            resizeGridForY(spawnY + piece.getBoundingHeight() - 1);
+
+            int moveX = 0;
+            int moveDown = 0;
+            int inputCount = 0;
+            var start = new FallStart(pieceType, jetIndex);
+            while (true){
+                char c = inputs[jetIndex];
+                if (c == '<') {
+                    boolean left = piece.tryMoveLeft(grid);
+                    if (left) {
+                        moveX--;
+                    }
+                } else if (c == '>') {
+                    boolean right = piece.tryMoveRight(grid);
+                    if (right) {
+                        moveX++;
+                    }
+                } else {
+                    throw new RuntimeException("Incorrect input");
+                }
+                inputCount++;
+                jetIndex++;
+                jetIndex = jetIndex % inputs.length;
+
+                boolean down = piece.tryMoveDown(grid);
+                if (!down) {
+                    break;
+                } else {
+                    moveDown++;
+                }
+            }
+            piece.addToGrid(grid);
+//            printGrid();
+            int pieceTopY = piece.getBottomY() + piece.getBoundingHeight() - 1;
+            int towerGrowth = Math.max(pieceTopY + 1 - towerMaxHeight, 0);
+            if (towerGrowth > 0) {
+                towerMaxHeight += towerGrowth;
+            }
+
+            var result = new FallResult(moveX, moveDown, inputCount, towerGrowth);
+            if (movements.containsKey(start)) {
+                var prevResult = movements.get(start);
+                if(prevResult.equals(result)) {
+                    System.out.println("Result match: " + start + ", " + result);
+                    System.out.println("Piece index: " + pieceIndex);
+                    if (checks.containsKey(start) && checks.get(start)) {
+                        break;
+                    } else {
+                        checks.put(start, true);
+                    }
+                } else {
+                    checks.put(start, false);
+                }
+            } else {
+                checks.clear();
+                movements.put(start, result);
+            }
+        }
+        long piecesFit = pieceIndex + 1;
+        long repeatingIntervalSize = checks.size();
+        long repeatingIntervalStart = pieceIndex - repeatingIntervalSize * 2;
+        long repeatingIntervalEnd = repeatingIntervalStart + repeatingIntervalSize - 1;
+        long towerGrowthPerInterval = checks.keySet().stream().mapToInt(start -> movements.get(start).towerGrowth()).sum();
+        System.out.println("First repeating piece has index " + repeatingIntervalStart);
+        System.out.println("Last repeating piece has index " + repeatingIntervalEnd);
+        System.out.println("Tower growth per interval " + towerGrowthPerInterval);
+        long remainingPieces = 1_000_000_000_000L - piecesFit;
+        System.out.println("Pieces already fit: " + piecesFit);
+        System.out.println("Pieces to fit: " + remainingPieces);
+        long towerHeight = towerMaxHeight;
+        System.out.println("Current tower height: " + towerHeight);
+        long intervalsToFit = remainingPieces / repeatingIntervalSize;
+        System.out.println("Can fit intervals: " + intervalsToFit);
+        towerHeight += intervalsToFit * towerGrowthPerInterval;
+        pieceIndex += intervalsToFit * repeatingIntervalSize;
+        piecesFit += intervalsToFit * repeatingIntervalSize;
+        remainingPieces = 1_000_000_000_000L - piecesFit;
+        System.out.printf("After fitting intervals: %d pieces fit, %d remaining, tower height %d%n", piecesFit, remainingPieces, towerHeight);
+        var itr = checks.keySet().iterator();
+        for (long i = 0; i <= remainingPieces; i++) {
+            var next = itr.next();
+            if (i == 0) {
+                continue;
+            }
+            towerHeight += movements.get(next).towerGrowth();
+
+        }
+//        printGrid();
+//        System.out.println(movements);
+        return towerHeight;
     }
 
     private record Point(int x, int y) {}
@@ -84,7 +258,7 @@ public class Day17 extends Solution {
         void addToGrid(char[][] grid);
 
         default int getGridRowUnder(char[][] grid) {
-            return grid.length - 1 + getBottomY();
+            return grid.length - 1 - getBottomY();
         }
 
         default int getGridColumnToTheLeft() {
@@ -144,8 +318,8 @@ public class Day17 extends Solution {
     }
 
     private static class HorizontalPiece extends AbstractPiece {
-        public HorizontalPiece(Point spawnPoint) {
-            super(spawnPoint.x(), spawnPoint.y());
+        public HorizontalPiece(int leftX, int bottomY) {
+            super(leftX, bottomY);
         }
 
         @Override
@@ -187,8 +361,8 @@ public class Day17 extends Solution {
     }
 
     private static class CrossPiece extends AbstractPiece {
-        public CrossPiece(Point spawnPoint) {
-            super(spawnPoint.x(), spawnPoint.y() - 2);
+        public CrossPiece(int leftX, int bottomY) {
+            super(leftX, bottomY);
         }
 
         @Override
@@ -203,17 +377,23 @@ public class Day17 extends Solution {
 
         @Override
         public boolean canMoveDown(char[][] grid) {
-            return grid[getGridRowUnder(grid)][getGridColumnToTheLeft() + 2] == '.';
+            return grid[getGridRowUnder(grid)][getGridColumnToTheLeft() + 2] == '.'
+                    && grid[getGridRowUnder(grid) - 1][getGridColumnToTheLeft() + 1] == '.'
+                    && grid[getGridRowUnder(grid) - 1][getGridColumnToTheLeft() + 3] == '.';
         }
 
         @Override
         public boolean canMoveRight(char[][] grid) {
-            return grid[getGridRowUnder(grid) - 2][getGridColumnToTheRight()] == '.';
+            return grid[getGridRowUnder(grid) - 2][getGridColumnToTheRight()] == '.'
+                    && grid[getGridRowUnder(grid) - 3][getGridColumnToTheRight() - 1] == '.'
+                    && grid[getGridRowUnder(grid) - 1][getGridColumnToTheRight() - 1] == '.';
         }
 
         @Override
         public boolean canMoveLeft(char[][] grid) {
-            return grid[getGridRowUnder(grid) - 2][getGridColumnToTheLeft()] == '.';
+            return grid[getGridRowUnder(grid) - 2][getGridColumnToTheLeft()] == '.'
+                    && grid[getGridRowUnder(grid) - 3][getGridColumnToTheLeft() + 1] == '.'
+                    && grid[getGridRowUnder(grid) - 1][getGridColumnToTheLeft() + 1] == '.';
         }
 
         @Override
@@ -230,8 +410,8 @@ public class Day17 extends Solution {
 
     private static class ReverseLPiece extends AbstractPiece {
 
-        public ReverseLPiece(Point spawnPoint) {
-            super(spawnPoint.x(), spawnPoint.y() - 2);
+        public ReverseLPiece(int leftX, int bottomY) {
+            super(leftX, bottomY);
         }
 
         @Override
@@ -266,7 +446,9 @@ public class Day17 extends Solution {
 
         @Override
         public boolean canMoveLeft(char[][] grid) {
-            return grid[getGridRowUnder(grid) - 1][getGridColumnToTheLeft()] == '.';
+            return grid[getGridRowUnder(grid) - 1][getGridColumnToTheLeft()] == '.'
+                    && grid[getGridRowUnder(grid) - 2][getGridColumnToTheLeft() + 2] == '.'
+                    && grid[getGridRowUnder(grid) - 3][getGridColumnToTheLeft() + 2] == '.';
         }
 
         @Override
@@ -283,8 +465,8 @@ public class Day17 extends Solution {
 
     private static class VerticalPiece extends AbstractPiece {
 
-        public VerticalPiece(Point spawnPoint) {
-            super(spawnPoint.x(), spawnPoint.y() - 3);
+        public VerticalPiece(int leftX, int bottomY) {
+            super(leftX, bottomY);
         }
 
         @Override
@@ -335,8 +517,8 @@ public class Day17 extends Solution {
 
     private static class CubePiece extends AbstractPiece {
 
-        public CubePiece(Point spawnPoint) {
-            super(spawnPoint.x(), spawnPoint.y() - 1);
+        public CubePiece(int leftX, int bottomY) {
+            super(leftX, bottomY);
         }
 
         @Override
