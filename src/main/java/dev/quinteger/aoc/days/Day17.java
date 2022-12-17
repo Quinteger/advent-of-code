@@ -12,11 +12,23 @@ public class Day17 extends Solution {
     @Override
     public Object solvePart1(List<String> input, boolean example) {
         initializeGrid();
-        String line = input.get(0);
+        char[] inputs = input.get(0).toCharArray();
         for (int i = 0; i < 1; i++) {
             int spawnHeight = getSpawnHeight();
             resizeGridForHeight(spawnHeight);
-
+            RockPiece piece = new HorizontalPiece(new Point(2, spawnHeight));
+            for (char c : inputs) {
+                if (c == '<') {
+                    piece.tryMoveLeft(grid);
+                } else if (c == '>') {
+                    piece.tryMoveRight(grid);
+                } else {
+                    throw new RuntimeException("Incorrect input");
+                }
+                if (piece.tryMoveDown(grid)) {
+                    break;
+                }
+            }
         }
         return null;
     }
@@ -68,6 +80,8 @@ public class Day17 extends Solution {
         boolean canMoveRight(char[][] grid);
         boolean tryMoveLeft(char[][] grid);
         boolean canMoveLeft(char[][] grid);
+
+        void addToGrid(char[][] grid);
 
         default int getGridRowUnder(char[][] grid) {
             return grid.length - 1 + getBottomY();
@@ -160,6 +174,16 @@ public class Day17 extends Solution {
         public boolean canMoveLeft(char[][] grid) {
             return grid[getGridRowUnder(grid) - 1][getGridColumnToTheLeft()] == '.';
         }
+
+        @Override
+        public void addToGrid(char[][] grid) {
+            int row = getGridRowUnder(grid) - 1;
+            int column = getGridColumnToTheLeft() + 1;
+            grid[row][column] = '@';
+            grid[row][column + 1] = '@';
+            grid[row][column + 2] = '@';
+            grid[row][column + 3] = '@';
+        }
     }
 
     private static class CrossPiece extends AbstractPiece {
@@ -190,6 +214,17 @@ public class Day17 extends Solution {
         @Override
         public boolean canMoveLeft(char[][] grid) {
             return grid[getGridRowUnder(grid) - 2][getGridColumnToTheLeft()] == '.';
+        }
+
+        @Override
+        public void addToGrid(char[][] grid) {
+            int row = getGridRowUnder(grid) - 1;
+            int column = getGridColumnToTheLeft() + 1;
+            grid[row][column + 1] = '@';
+            grid[row - 1][column] = '@';
+            grid[row - 1][column + 1] = '@';
+            grid[row - 1][column + 2] = '@';
+            grid[row - 2][column + 1] = '@';
         }
     }
 
@@ -233,6 +268,17 @@ public class Day17 extends Solution {
         public boolean canMoveLeft(char[][] grid) {
             return grid[getGridRowUnder(grid) - 1][getGridColumnToTheLeft()] == '.';
         }
+
+        @Override
+        public void addToGrid(char[][] grid) {
+            int row = getGridRowUnder(grid) - 1;
+            int column = getGridColumnToTheLeft() + 1;
+            grid[row][column] = '@';
+            grid[row][column + 1] = '@';
+            grid[row][column + 2] = '@';
+            grid[row - 1][column + 2] = '@';
+            grid[row - 2][column + 2] = '@';
+        }
     }
 
     private static class VerticalPiece extends AbstractPiece {
@@ -274,6 +320,16 @@ public class Day17 extends Solution {
                 }
             }
             return true;
+        }
+
+        @Override
+        public void addToGrid(char[][] grid) {
+            int row = getGridRowUnder(grid) - 1;
+            int column = getGridColumnToTheLeft() + 1;
+            grid[row][column] = '@';
+            grid[row - 1][column] = '@';
+            grid[row - 2][column] = '@';
+            grid[row - 3][column] = '@';
         }
     }
 
@@ -321,6 +377,16 @@ public class Day17 extends Solution {
                 }
             }
             return true;
+        }
+
+        @Override
+        public void addToGrid(char[][] grid) {
+            int row = getGridRowUnder(grid) - 1;
+            int column = getGridColumnToTheLeft() + 1;
+            grid[row][column] = '@';
+            grid[row][column + 1] = '@';
+            grid[row - 1][column] = '@';
+            grid[row - 1][column + 1] = '@';
         }
     }
 }
