@@ -194,6 +194,7 @@ public class Day17 extends Solution {
         long towerGrowthPerInterval = checks.stream().mapToInt(start -> movements.get(start).towerGrowth()).sum();
         System.out.println("First repeating piece has index " + repeatingIntervalStart);
         System.out.println("Last repeating piece has index " + repeatingIntervalEnd);
+        System.out.println("Interval length is " + repeatingIntervalSize);
         System.out.println("Tower growth per interval " + towerGrowthPerInterval);
         long remainingPieces = bigPieceCount - piecesFit;
         System.out.println("Pieces already fit: " + piecesFit);
