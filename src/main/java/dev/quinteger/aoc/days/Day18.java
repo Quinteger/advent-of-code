@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class Day18 extends Solution {
     private final Set<Point> points = new HashSet<>();
@@ -39,50 +41,48 @@ public class Day18 extends Solution {
         createPoints(input);
         int faces = 0;
         for (Point point : points) {
-            faces += 6 - getLavaNeighbourCount(point);
+            faces += getAirNeighbourCount(point);
         }
         return faces;
     }
 
-    private record Point(int x, int y, int z) {}
-
-    private List<Point> getAllNeighbours(Point point) {
-        List<Point> neighbours =  new ArrayList<>(6);
-        for (int i = 0; i < 6; i++) {
-            var neighbourPoint = switch (i) {
-                case 0 -> new Point(point.x() - 1, point.y(), point.z());
-                case 1 -> new Point(point.x() + 1, point.y(), point.z());
-                case 2 -> new Point(point.x(), point.y() - 1, point.z());
-                case 3 -> new Point(point.x(), point.y() + 1, point.z());
-                case 4 -> new Point(point.x(), point.y(), point.z() - 1);
-                case 5 -> new Point(point.x(), point.y(), point.z() + 1);
-                default -> throw new RuntimeException();
-            };
-            neighbours.add(neighbourPoint);
+    private record Point(int x, int y, int z) {
+        private List<Point> getAllNeighbours() {
+            List<Point> neighbours =  new ArrayList<>(6);
+            for (int i = 0; i < 6; i++) {
+                var neighbourPoint = switch (i) {
+                    case 0 -> new Point(x - 1, y, z);
+                    case 1 -> new Point(x + 1, y, z);
+                    case 2 -> new Point(x, y - 1, z);
+                    case 3 -> new Point(x, y + 1, z);
+                    case 4 -> new Point(x, y, z - 1);
+                    case 5 -> new Point(x, y, z + 1);
+                    default -> throw new RuntimeException();
+                };
+                neighbours.add(neighbourPoint);
+            }
+            return neighbours;
         }
-        return neighbours;
+
+        private List<Point> getNeighbours(Predicate<? super Point> predicate) {
+            return getAllNeighbours().stream().filter(predicate).collect(Collectors.toCollection(() -> new ArrayList<>(6)));
+        }
     }
 
     private List<Point> getAirNeighbours(Point point) {
-//        return getAllNeighbours(point).stream().filter(p -> !points.contains(point)).collect(Collectors.toCollection(() -> new ArrayList<>(6)));
-        var neighbours = getAllNeighbours(point);
-        var airNeighbours = new ArrayList<Point>(6);
-        for (Point neighbour : neighbours) {
-            if (!points.contains(neighbour)) {
-                airNeighbours.add(neighbour);
-            }
-        }
-        return airNeighbours;
+        return point.getNeighbours(p -> !points.contains(p));
+    }
+
+    private int getAirNeighbourCount(Point point) {
+        return getAirNeighbours(point).size();
+    }
+
+    private List<Point> getLavaNeighbours(Point point) {
+        return point.getNeighbours(points::contains);
     }
 
     private int getLavaNeighbourCount(Point point) {
-        int lavaNeighbours = 0;
-        for (Point neighbour : getAllNeighbours(point)) {
-            if (points.contains(neighbour)) {
-                lavaNeighbours++;
-            }
-        }
-        return lavaNeighbours;
+        return getLavaNeighbours(point).size();
     }
 
     private boolean isOutside(Point point) {
