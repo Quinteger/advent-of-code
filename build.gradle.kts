@@ -2,6 +2,7 @@ plugins {
     application
     java
     idea
+    kotlin("jvm") version "1.7.21"
 }
 
 group = "dev.quinteger"
@@ -12,7 +13,8 @@ repositories {
 }
 
 dependencies {
-    implementation("it.unimi.dsi:fastutil-core:8.5.9")
+    implementation(kotlin("stdlib-jdk8"))
+    implementation("it.unimi.dsi:fastutil-core:8.5.11")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
