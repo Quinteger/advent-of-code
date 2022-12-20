@@ -96,16 +96,16 @@ public class Day19 extends Solution {
                 throw new RuntimeException();
             }
         }
-        for (Map.Entry<Integer, Blueprint> entry : blueprints.entrySet()) {
-            System.out.println(entry.getKey() + ": " + entry.getValue());
-        }
+//        for (Map.Entry<Integer, Blueprint> entry : blueprints.entrySet()) {
+//            System.out.println(entry.getKey() + ": " + entry.getValue());
+//        }
     }
 
     @Override
     public Object solvePart1(List<String> input, boolean example) {
         parseBlueprints(input);
         var result = blueprints.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> findBestForBlueprint(e.getValue(), 24)));
-        System.out.println(result);
+//        System.out.println(result);
         return result.entrySet().stream().mapToInt(e -> e.getKey() * e.getValue()).sum();
     }
 
@@ -202,12 +202,11 @@ public class Day19 extends Solution {
 
     @Override
     public Object solvePart2(List<String> input, boolean example) {
-        parseBlueprints(input);
         var result = blueprints.entrySet().stream()
                 .sorted(Comparator.comparingInt(Map.Entry::getKey))
                 .limit(3)
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> findBestForBlueprint(e.getValue(), 32)));
-        System.out.println(result);
+//        System.out.println(result);
         return result.values().stream().mapToInt(e -> e).reduce(1, (i1, i2) -> i1 * i2);
     }
 }
