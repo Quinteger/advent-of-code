@@ -20,7 +20,7 @@ public class Day21 extends Solution {
                 monkeyInputs.put(matcher.group(1), matcher.group(2));
             }
         }
-        System.out.println(monkeyInputs);
+//        System.out.println(monkeyInputs);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class Day21 extends Solution {
                 return value;
             }
 
-            if (left != null || right != null) {
+            if (left != null && right != null) {
                 return switch (operation) {
                     case "+" -> left.value == null ? left.enforceValue(value - right.value) : right.enforceValue(value - left.value);
                     case "-" -> left.value == null ? left.enforceValue(value + right.value) : right.enforceValue(left.value - value);
@@ -107,12 +107,6 @@ public class Day21 extends Solution {
                 throw new RuntimeException();
             }
         }
-    }
-
-    private Monkey root;
-
-    private void parseAsTree() {
-
     }
 
     private Monkey parseMonkey(String name) {
@@ -146,7 +140,6 @@ public class Day21 extends Solution {
 
     @Override
     public Object solvePart2(List<String> input, boolean example) {
-        root = parseMonkey("root");
-        return root.solve();
+        return parseMonkey("root").solve();
     }
 }
