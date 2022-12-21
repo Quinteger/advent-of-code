@@ -2,7 +2,7 @@ plugins {
     application
     java
     idea
-    kotlin("jvm") version "1.7.21"
+    kotlin("jvm") version "1.7.20"
 }
 
 group = "dev.quinteger"
