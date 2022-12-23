@@ -89,13 +89,10 @@ public class Day23 extends Solution {
     }
 
     private void printPositions(Set<Point> positions) {
-        int minRow = positions.stream().mapToInt(Point::row).min().orElseThrow();
-        int maxRow = positions.stream().mapToInt(Point::row).max().orElseThrow();
-        int minCol = positions.stream().mapToInt(Point::column).min().orElseThrow();
-        int maxCol = positions.stream().mapToInt(Point::column).max().orElseThrow();
+        var boundaries = getBoundaries(positions);
 
-        for (int i = minRow; i <= maxRow; i++) {
-            for (int j = minCol; j <= maxCol; j++) {
+        for (int i = boundaries.minRow(); i <= boundaries.maxRow(); i++) {
+            for (int j = boundaries.minColumn(); j <= boundaries.maxColumn(); j++) {
                 if (positions.contains(new Point(i, j))) {
                     System.out.print('#');
                 } else {
@@ -111,15 +108,26 @@ public class Day23 extends Solution {
     public Object solvePart1(List<String> input, boolean example) {
         parseInput(input);
         printPositions();
-        var result = simulate(10);
-        int minRow = result.stream().mapToInt(Point::row).min().orElseThrow();
-        int maxRow = result.stream().mapToInt(Point::row).max().orElseThrow();
-        int minCol = result.stream().mapToInt(Point::column).min().orElseThrow();
-        int maxCol = result.stream().mapToInt(Point::column).max().orElseThrow();
-        return (maxRow - minRow + 1) * (maxCol - minCol + 1) - result.size();
+        var result = simulate(10).points();
+        var boundaries = getBoundaries(result);
+        return (boundaries.maxRow() - boundaries.minRow() + 1) * (boundaries.maxColumn() - boundaries.minColumn() + 1) - result.size();
     }
 
-    private record Direction(Function<Point, Set<Point>> checkExtractor, Function<Point, Point> moveExtractor) {}
+    private Boundaries getBoundaries(Collection<Point> points) {
+        return new Boundaries(
+                points.stream().mapToInt(Point::row).min().orElseThrow(),
+                points.stream().mapToInt(Point::row).max().orElseThrow(),
+                points.stream().mapToInt(Point::column).min().orElseThrow(),
+                points.stream().mapToInt(Point::column).max().orElseThrow()
+        );
+    }
+
+    private record Boundaries(int minRow, int maxRow, int minColumn, int maxColumn) {}
+
+    private record Direction(
+            Function<? super Point, ? extends Set<? extends Point>> checkExtractor,
+            Function<? super Point, ? extends Point> moveExtractor
+    ) {}
 
     private Deque<Direction> getDirections() {
         var deque = new ArrayDeque<Direction>(4);
@@ -128,58 +136,6 @@ public class Day23 extends Solution {
         deque.add(new Direction(Point::get3WestPoints, Point::west));
         deque.add(new Direction(Point::get3EastPoints, Point::east));
         return deque;
-    }
-
-    private Set<Point> simulate(int turns) {
-        Set<Point> positions = new HashSet<>(this.positions);
-        var directions = getDirections();
-        for (int turn = 1; turn <= turns; turn++) {
-            Set<Point> currentPositions = new HashSet<>(positions);
-            Map<Point, List<Point>> targets = HashMap.newHashMap(currentPositions.size());
-
-            for (Point point : positions) {
-                if (Collections.disjoint(positions, point.get8PointsAround())) {
-                    continue;
-                }
-//                else if (Collections.disjoint(positions, point.get3NorthPoints())) {
-//                    addTarget(targets, point, point.north());
-//                    currentPositions.remove(point);
-//                } else if (Collections.disjoint(positions, point.get3SouthPoints())) {
-//                    addTarget(targets, point, point.south());
-//                    currentPositions.remove(point);
-//                } else if (Collections.disjoint(positions, point.get3WestPoints())) {
-//                    addTarget(targets, point, point.west());
-//                    currentPositions.remove(point);
-//                } else if (Collections.disjoint(positions, point.get3EastPoints())) {
-//                    addTarget(targets, point, point.east());
-//                    currentPositions.remove(point);
-//                }
-                for (var direction : directions) {
-                    if (Collections.disjoint(positions, direction.checkExtractor().apply(point))) {
-                        addTarget(targets, point, direction.moveExtractor().apply(point));
-                        currentPositions.remove(point);
-                        break;
-                    }
-                }
-            }
-
-            positions.clear();
-            positions.addAll(currentPositions);
-            for (var entry : targets.entrySet()) {
-                var to = entry.getKey();
-                var fromList = entry.getValue();
-                if (fromList == null || fromList.size() == 0) {
-                    throw new RuntimeException();
-                } else if (fromList.size() == 1) {
-                    positions.add(to);
-                } else {
-                    positions.addAll(fromList);
-                }
-            }
-//            printPositions(positions);
-            directions.addLast(directions.removeFirst());
-        }
-        return positions;
     }
 
     private void addTarget(Map<Point, List<Point>> targets, Point from, Point to) {
@@ -197,13 +153,19 @@ public class Day23 extends Solution {
 
     @Override
     public Object solvePart2(List<String> input, boolean example) {
-        return simulateUntilStop();
+        return simulate().turns();
     }
 
-    private int simulateUntilStop() {
+    private record SimulationResult(Set<Point> points, int turns) {}
+
+    private SimulationResult simulate() {
+        return simulate(Integer.MAX_VALUE);
+    }
+
+    private SimulationResult simulate(int turns) {
         Set<Point> positions = new HashSet<>(this.positions);
         var directions = getDirections();
-        for (int turn = 1; ; turn++) {
+        for (int turn = 1; turn <= turns; turn++) {
             Set<Point> currentPositions = new HashSet<>(positions);
             Map<Point, List<Point>> targets = HashMap.newHashMap(currentPositions.size());
 
@@ -211,19 +173,6 @@ public class Day23 extends Solution {
                 if (Collections.disjoint(positions, point.get8PointsAround())) {
                     continue;
                 }
-//                else if (Collections.disjoint(positions, point.get3NorthPoints())) {
-//                    addTarget(targets, point, point.north());
-//                    currentPositions.remove(point);
-//                } else if (Collections.disjoint(positions, point.get3SouthPoints())) {
-//                    addTarget(targets, point, point.south());
-//                    currentPositions.remove(point);
-//                } else if (Collections.disjoint(positions, point.get3WestPoints())) {
-//                    addTarget(targets, point, point.west());
-//                    currentPositions.remove(point);
-//                } else if (Collections.disjoint(positions, point.get3EastPoints())) {
-//                    addTarget(targets, point, point.east());
-//                    currentPositions.remove(point);
-//                }
                 for (var direction : directions) {
                     if (Collections.disjoint(positions, direction.checkExtractor().apply(point))) {
                         addTarget(targets, point, direction.moveExtractor().apply(point));
@@ -234,7 +183,7 @@ public class Day23 extends Solution {
             }
 
             if (targets.isEmpty()) {
-                return turn;
+                return new SimulationResult(positions, turn);
             }
 
             positions.clear();
@@ -253,5 +202,6 @@ public class Day23 extends Solution {
 //            printPositions(positions);
             directions.addLast(directions.removeFirst());
         }
+        return new SimulationResult(positions, turns);
     }
 }
