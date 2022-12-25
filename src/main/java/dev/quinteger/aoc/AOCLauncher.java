@@ -6,11 +6,7 @@ import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystemNotFoundException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.Collections;
 import java.util.List;
 
@@ -66,8 +62,8 @@ public class AOCLauncher {
         }
 
 
-        var inputLines = readLines(inputPath, true);
-        var solutionLines = readLines(solutionPath, false);
+        var inputLines = Collections.unmodifiableList(readLines(inputPath, true));
+        var solutionLines = Collections.unmodifiableList(readLines(solutionPath, false));
 
         if (!inputLines.isEmpty()) {
             System.out.println(message);
