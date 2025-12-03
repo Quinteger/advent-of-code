@@ -1,5 +1,7 @@
 package dev.quinteger.aoc;
 
+import dev.quinteger.aoc.solutions.Solution;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Constructor;
@@ -37,10 +39,12 @@ public class AOCLauncher {
         }
 
         var settings = builder.build();
-        System.out.printf("Firing solution for year %d, day %d%n", settings.year(), settings.day());
+        int year = settings.year();
+        int day = settings.day();
+        System.out.printf("Firing solution for year %d, day %d%n", year, day);
 
-        var suffix = "%02d".formatted(settings.day());
-        Class<? extends Solution> solutionClass = getSolutionClass(suffix);
+        var suffix = "%02d".formatted(day);
+        Class<? extends Solution> solutionClass = getSolutionClass(year, suffix);
         Constructor<? extends Solution> constructor = getSolutionClassConstructor(solutionClass);
 
         Solution solution = createSolutionInstance(constructor);
@@ -52,12 +56,12 @@ public class AOCLauncher {
 
         String user = settings.user();
         if (user == null) {
-            inputPath = "/%d/day%s/input.txt".formatted(settings.year(), suffix);
-            solutionPath = "/%d/day%s/answer.txt".formatted(settings.year(), suffix);
+            inputPath = "/%d/day%s/input.txt".formatted(year, suffix);
+            solutionPath = "/%d/day%s/answer.txt".formatted(year, suffix);
             message = "Firing example solution";
         } else {
-            inputPath = "/%d/day%s/%s/input.txt".formatted(settings.year(), suffix, settings.user());
-            solutionPath = "/%d/day%s/%s/answer.txt".formatted(settings.year(), suffix, settings.user());
+            inputPath = "/%d/day%s/%s/input.txt".formatted(year, suffix, settings.user());
+            solutionPath = "/%d/day%s/%s/answer.txt".formatted(year, suffix, settings.user());
             message = "Firing solution for user " + user;
         }
 
@@ -97,9 +101,9 @@ public class AOCLauncher {
         return intArg;
     }
 
-    private static Class<? extends Solution> getSolutionClass(String suffix) {
+    private static Class<? extends Solution> getSolutionClass(int year, String deySuffix) {
         try {
-            return Class.forName("dev.quinteger.aoc.days.Day%s".formatted(suffix)).asSubclass(Solution.class);
+            return Class.forName("dev.quinteger.aoc.solutions.y%d.Day%s".formatted(year, deySuffix)).asSubclass(Solution.class);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Class for the specified solution is not implemented", e);
         } catch (ClassCastException e) {
