@@ -1,6 +1,7 @@
 package dev.quinteger.aoc;
 
 import dev.quinteger.aoc.solutions.Solution;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -45,60 +46,53 @@ public class AOCLauncher {
 
         var suffix = "%02d".formatted(day);
         Class<? extends Solution> solutionClass = getSolutionClass(year, suffix);
-        Constructor<? extends Solution> constructor = getSolutionClassConstructor(solutionClass);
 
-        Solution solution = createSolutionInstance(constructor);
-
-
-        String inputPath;
+        String part1InputPath;
+        String part2InputPath;
         String solutionPath;
         String message;
 
         String user = settings.user();
         if (user == null) {
-            inputPath = "/%d/day%s/input.txt".formatted(year, suffix);
+            part1InputPath = "/%d/day%s/input.txt".formatted(year, suffix);
+            part2InputPath = "/%d/day%s/input2.txt".formatted(year, suffix);
             solutionPath = "/%d/day%s/answer.txt".formatted(year, suffix);
             message = "Firing example solution";
         } else {
-            inputPath = "/%d/day%s/%s/input.txt".formatted(year, suffix, settings.user());
+            part1InputPath = "/%d/day%s/%s/input.txt".formatted(year, suffix, settings.user());
+            part2InputPath = part1InputPath;
             solutionPath = "/%d/day%s/%s/answer.txt".formatted(year, suffix, settings.user());
             message = "Firing solution for user " + user;
         }
 
+        var part1InputLines = readLines(part1InputPath, true);
+        boolean example = user == null;
+        List<String> part2InputLines;
+        if (example) {
+            var maybePart2InputLines = readLines(part2InputPath, false);
+            if (maybePart2InputLines != null) {
+                part2InputLines = maybePart2InputLines;
+            } else {
+                part2InputLines = part1InputLines;
+            }
+        } else {
+            part2InputLines = part1InputLines;
+        }
 
-        var inputLines = Collections.unmodifiableList(readLines(inputPath, true));
-        var solutionLines = Collections.unmodifiableList(readLines(solutionPath, false));
+        Solution solution = createSolutionInstance(solutionClass, part1InputLines, part2InputLines, example);
 
-        if (!inputLines.isEmpty()) {
+        var solutionLines = readLines(solutionPath, false);
+
+        if (!part1InputLines.isEmpty()) {
             System.out.println(message);
             if (solutionLines.isEmpty()) {
-                solution.solve(inputLines, true, "", "");
+                solution.solve(part1InputLines, part2InputLines, example, null, null);
             } else if (solutionLines.size() == 2) {
-                solution.solve(inputLines, true, solutionLines.get(0), solutionLines.get(1));
+                solution.solve(part1InputLines, part2InputLines, example, solutionLines.get(0), solutionLines.get(1));
             } else {
                 throw new IllegalArgumentException("Solution file must have 2 lines");
             }
         }
-    }
-
-    private static String getArg(String[] args) {
-        if (args.length != 1) {
-            throw new IllegalArgumentException("Please specify a single argument with the day number");
-        }
-        return args[0];
-    }
-
-    private static int getIntArg(String arg) {
-        int intArg;
-        try {
-            intArg = Integer.parseInt(arg);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("The specified argument is not a valid integer", e);
-        }
-        if (intArg < MIN || intArg > MAX) {
-            throw new IllegalArgumentException("The argument \"%d\" is out of bounds, should be between %d and %d".formatted(intArg, MIN, MAX));
-        }
-        return intArg;
     }
 
     private static Class<? extends Solution> getSolutionClass(int year, String deySuffix) {
@@ -108,14 +102,6 @@ public class AOCLauncher {
             throw new RuntimeException("Class for the specified solution is not implemented", e);
         } catch (ClassCastException e) {
             throw new RuntimeException("Class does not extend Solution", e);
-        }
-    }
-
-    private static Constructor<? extends Solution> getSolutionClassConstructor(Class<? extends Solution> solutionClass) {
-        try {
-            return solutionClass.getConstructor();
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Class does not have the required constructor", e);
         }
     }
 
@@ -176,10 +162,6 @@ public class AOCLauncher {
         return result;
     }
 
-    private interface ResourceReader<R> {
-        R readResource(Path path) throws IOException;
-    }
-
     private static FileSystem createFileSystem(URI uri) throws IOException {
         try {
             return FileSystems.getFileSystem(uri);
@@ -187,12 +169,60 @@ public class AOCLauncher {
             return FileSystems.newFileSystem(uri, Collections.emptyMap());
         }
     }
-
-    private static Solution createSolutionInstance(Constructor<? extends Solution> constructor) {
+    private static Solution createSolutionInstance(
+            Class<? extends Solution> solutionClass,
+            List<String> part1InputLines,
+            List<String> part2InputLines,
+            boolean example
+    ) {
         try {
-            return constructor.newInstance();
+            Constructor<? extends Solution> constructor = getSolutionConstructorIfExists(solutionClass, List.class, List.class, boolean.class);
+            if (constructor != null) {
+                return callAndTimeConstructor(constructor, part1InputLines, part2InputLines, example);
+            }
+            constructor = getSolutionConstructorIfExists(solutionClass, List.class, boolean.class);
+            if (constructor != null) {
+                return callAndTimeConstructor(constructor, part1InputLines, example);
+            }
+            constructor = getSolutionConstructorIfExists(solutionClass, List.class);
+            if (constructor != null) {
+                return callAndTimeConstructor(constructor, part1InputLines);
+            }
+            constructor = solutionClass.getConstructor();
+            return callAndTimeConstructor(constructor, part1InputLines);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException("Reflection error while trying to instantiate the solution class", e);
         }
     }
+
+    @Nullable
+    private static Constructor<? extends Solution> getSolutionConstructorIfExists(Class<? extends Solution> solutionClass, Class<?>... parameterTypes) {
+        try {
+            return solutionClass.getConstructor(parameterTypes);
+        } catch (NoSuchMethodException e) {
+            return null;
+        }
+    }
+    
+    private static Solution callAndTimeConstructor(Constructor<? extends Solution> constructor, Object... args) throws ReflectiveOperationException {
+        long start = System.nanoTime();
+        Solution solution = constructor.newInstance(args);
+        long end = System.nanoTime();
+        System.out.printf("Created solution instance of type %s in %.3fms%n", solution.getClass().getSimpleName(), (end - start) / 1e6D);
+        return solution;
+    }
+
+    @FunctionalInterface
+    private interface ResourceReader<R> {
+
+        R readResource(Path path) throws IOException;
+    }
 }
+
+
+
+
+
+
+
+

@@ -2,7 +2,7 @@ plugins {
     application
     java
     idea
-    kotlin("jvm") version "2.2.21"
+    kotlin("jvm") version "2.3.0"
 }
 
 group = "dev.quinteger"
@@ -23,8 +23,22 @@ tasks.getByName<Test>("test") {
     useJUnitPlatform()
 }
 
-for (year in 2022..2025) {
-    for (day in 1..25) {
+val days = linkedMapOf(
+    2015 to 25,
+    2016 to 25,
+    2017 to 25,
+    2018 to 25,
+    2019 to 25,
+    2020 to 25,
+    2021 to 25,
+    2022 to 25,
+    2023 to 25,
+    2024 to 25,
+    2025 to 12,
+)
+
+days.forEach { year, amountOfDays ->
+    for (day in 1..amountOfDays) {
         tasks.register<JavaExec>("y%4d-d%02d".format(year, day)) {
             classpath = sourceSets.main.get().runtimeClasspath
             mainClass.set("dev.quinteger.aoc.AOCLauncher")
